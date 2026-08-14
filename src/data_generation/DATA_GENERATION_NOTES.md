@@ -12,11 +12,19 @@ Produce reproducible CSV files for `data/customers.csv`, `data/orders.csv`, and 
 
 ## Planned Bad Record Types
 
-| Entity | Issue | Purpose |
-|--------|-------|---------|
-| Customers | Null email, duplicate customer_id | Completeness, uniqueness |
-| Orders | Invalid customer_id, negative quantity | Referential integrity, business logic |
-| Products | Invalid unit_price (negative or zero) | Business logic |
+> **Authoritative specification:** See `requirements-analysis.md` §6.4.
+
+| Entity | Issue | Count | Purpose |
+|--------|-------|-------|---------|
+| Customers | NULL `email` | 50 | Completeness |
+| Customers | Duplicate `customer_id` | 10 | Uniqueness |
+| Orders | NULL `customer_id` | 100 | Completeness |
+| Orders | NULL `product_id` | 200 | Completeness |
+| Orders | Invalid `customer_id` | 50 | Referential integrity |
+| Orders | Invalid `product_id` | 30 | Referential integrity |
+| Orders | Duplicate `order_id` | 20 | Uniqueness |
+
+**Target:** approximately **700 problematic rows** across the dataset (see requirements-analysis.md §6.4).
 
 ## Output
 
