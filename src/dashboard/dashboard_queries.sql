@@ -1,0 +1,3 @@
+-- Dashboard queries against Gold tables.
+-- Implementation pending.
+-- See DASHBOARD_GUIDE.md for setup instructions.

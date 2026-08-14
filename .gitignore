@@ -1,0 +1,85 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.venv/
+venv/
+ENV/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+
+# Databricks
+.databricks/
+*.dbc
+.spark-warehouse/
+metastore_db/
+derby.log
+
+# Delta Lake / Spark local artifacts
+_delta_log/
+*.parquet
+*.delta
+
+# IDE and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Secrets and environment
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+credentials.json
+.databrickscfg
+
+# Logs and local runtime
+*.log
+logs/
+tmp/
+temp/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# OS
+desktop.ini
+
+# Local data overrides (keep committed sample CSVs; ignore large/generated dumps)
+data/generated/
+data/*.parquet
+data/archive/

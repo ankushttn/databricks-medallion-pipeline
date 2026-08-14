@@ -1,0 +1,2 @@
+-- Gold layer: daily and weekly revenue/order trends.
+-- Implementation pending.

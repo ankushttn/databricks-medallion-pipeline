@@ -1,0 +1,70 @@
+---
+description: Medallion architecture standards for the e-commerce Databricks pipeline
+alwaysApply: true
+---
+
+# Medallion Pipeline — Cursor Rules
+
+## Code Quality (Python)
+
+- Write readable, production-oriented Python.
+- Use type hints where practical.
+- Add docstrings to important functions and modules.
+- Do not silently swallow exceptions; log context and re-raise or handle explicitly.
+- Use `logging` instead of `print` for pipeline diagnostics.
+
+```python
+# BAD
+try:
+    df = spark.read.csv(path)
+except Exception:
+    pass
+
+# GOOD
+logger = logging.getLogger(__name__)
+try:
+    df = spark.read.csv(path)
+except AnalysisException as exc:
+    logger.error("Failed to read %s", path, exc_info=True)
+    raise
+```
+
+## Security
+
+- Never hardcode secrets (tokens, passwords, connection strings).
+- Load credentials from Databricks secrets, environment variables, or secure config.
+
+## Architecture (Do Not Change Without Approval)
+
+| Layer  | Responsibility |
+|--------|----------------|
+| Bronze | Raw, unchanged source data — preserve as-ingested |
+| Silver | Validation, cleansing flags, typed tables — **do not delete** intentionally bad records |
+| Gold   | Business-ready aggregations and metrics |
+
+- Do not modify architectural decisions without explaining why and obtaining approval.
+- Quality issues must be **flagged and measurable** (e.g., `_is_valid`, `_quality_flags`, quarantine tables).
+- Prefer deterministic sample data via a fixed random seed.
+
+## SQL
+
+- Write readable, formatted SQL with consistent casing and indentation.
+- Gold SQL files are analytics-facing; keep logic transparent.
+
+## Testing and Validation
+
+- Every major implementation must have tests or explicit validation steps.
+- Reuse existing utilities; do not duplicate logic across layers.
+
+## Workflow
+
+- Before large changes, inspect the existing project and reuse components.
+- Document every major Cursor interaction in `ai-prompts/` (prompt, outcome, files touched).
+
+## File Placement
+
+- Bronze ingestion → `src/bronze/`
+- Silver quality → `src/silver/`
+- Gold analytics → `src/gold/`
+- Dashboard queries → `src/dashboard/`
+- Sample data generation → `src/data_generation/`

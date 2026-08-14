@@ -1,0 +1,2 @@
+-- Gold layer: customer segmentation analytics.
+-- Implementation pending.

@@ -1,0 +1,2 @@
+-- Gold layer: sales by product aggregation.
+-- Implementation pending.

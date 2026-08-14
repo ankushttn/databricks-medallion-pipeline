@@ -1,0 +1,2 @@
+-- Gold layer: revenue by customer aggregation.
+-- Implementation pending.
