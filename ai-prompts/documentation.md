@@ -2,6 +2,21 @@
 
 ## Session Log
 
+### 2026-08-15 — Architecture & data model design
+
+**Goal:** Create architecture and data model design documents without implementation code.
+
+**Outcome:**
+
+- `design-notes.md` v2.0 — full layer docs, Mermaid diagrams, Delta/logging/error/DQ reporting
+- `data-model.md` v2.0 — updated schema (INT PKs, new columns), relationships, partitioning
+- `cursor-workflow/spec.md` v2.0 — technical specification aligned to design
+- `cursor-workflow/task-breakdown.md` — Phase 0.5 complete; implementation phases updated
+
+**Files touched:** `design-notes.md`, `data-model.md`, `cursor-workflow/spec.md`, `cursor-workflow/task-breakdown.md`, `ai-prompts/documentation.md`
+
+---
+
 ### 2026-08-15 — Requirements analysis
 
 **Goal:** Create a professional `requirements-analysis.md` covering all 20 sections, intentional DQ defects, ~700 problematic rows, and a traceability matrix.
