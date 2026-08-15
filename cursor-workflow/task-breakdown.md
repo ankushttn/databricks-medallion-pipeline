@@ -24,20 +24,15 @@
 
 ---
 
-## Phase 1 — Data Generation
+## Phase 1 — Data Generation ✅
 
-**Design reference:** `data-model.md` §2, `requirements-analysis.md` §6.4
-
-- [ ] Implement `generate_sample_data.py` with fixed random seed
-- [ ] Generate CSVs with schema:
-  - Customers: `customer_id`, `customer_name`, `email`, `country`, `signup_date`, `customer_segment`, `lifetime_value`
-  - Orders: `order_id`, `customer_id`, `order_date`, `product_id`, `quantity`, `unit_price`, `total_amount`, `order_status`, `payment_date`
-  - Products: `product_id`, `product_name`, `category`, `price`, `cost`, `stock_quantity`, `reorder_level`
-- [ ] Inject mandatory defects (50 NULL emails, 10 dup customer_id, order defects per spec)
-- [ ] Reach ~700 problematic rows (document approach in `DATA_GENERATION_NOTES.md`)
-- [ ] Update `data/*.csv` headers to match `data-model.md`
-- [ ] Update `database/seed-data-notes.md`
-- [ ] Add `tests/test_data_generation.py`
+- [x] Implement `generate_sample_data.py` with fixed random seed
+- [x] Generate CSVs with schema per `data-model.md`
+- [x] Inject mandatory defects (50 NULL emails, 10 dup customer_id, order defects per spec)
+- [x] Post-generation validation (fails loudly on mismatch)
+- [x] CLI args: `--output-dir`, `--seed`
+- [x] Update `DATA_GENERATION_NOTES.md`
+- [x] Add `tests/test_data_generation.py`
 
 ## Phase 2 — Bronze Layer
 
