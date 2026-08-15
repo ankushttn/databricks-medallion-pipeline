@@ -2,16 +2,20 @@
 
 ## Source Files
 
-| File | Entity | Status |
-|------|--------|--------|
-| `data/customers.csv` | Customers | Header only — awaiting generation |
-| `data/orders.csv` | Orders | Header only — awaiting generation |
-| `data/products.csv` | Products | Header only — awaiting generation |
+| File | Entity | Rows | Status |
+|------|--------|------|--------|
+| `data/customers.csv` | Customers | 10,010 | Generated |
+| `data/orders.csv` | Orders | 100,020 | Generated |
+| `data/products.csv` | Products | 500 | Generated |
 
 ## Generation
 
-Run `src/data_generation/generate_sample_data.py` (when implemented) to populate CSVs with deterministic sample data including intentional quality issues.
+```bash
+python src/data_generation/generate_sample_data.py --output-dir data --seed 42
+```
+
+See `src/data_generation/DATA_GENERATION_NOTES.md` for schema, defects, and validation details.
 
 ## Column Definitions
 
-See `data-model.md` for full field specifications.
+See `data-model.md` §2 for full field specifications.
