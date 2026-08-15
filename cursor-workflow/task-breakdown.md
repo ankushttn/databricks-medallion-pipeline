@@ -18,6 +18,7 @@
 - [x] `requirements-analysis.md` — full requirements (v1.0)
 - [x] `design-notes.md` — architecture, layers, Mermaid diagram, Delta/logging/error/DQ design (v2.0)
 - [x] `data-model.md` — full schemas, relationships, PKs/FKs, partitioning (v2.0)
+- [x] `data-quality-strategy.md` — formal DQ framework, 48 checks, metrics (v2.0)
 - [x] `cursor-workflow/spec.md` — technical specification (v2.0)
 - [x] `cursor-workflow/task-breakdown.md` — this file
 
@@ -55,11 +56,7 @@
 
 **Design reference:** `design-notes.md` §4, `data-model.md` §5
 
-- [ ] Implement `01_quality_completeness.py`
-- [ ] Implement `02_quality_uniqueness.py`
-- [ ] Implement `03_quality_type_validation.py`
-- [ ] Implement `04_quality_referential_integrity.py`
-- [ ] Implement `05_quality_business_logic.py`
+- [ ] Implement checks per `data-quality-strategy.md` (48 checks across 5 dimensions)
 - [ ] Implement `create_silver_tables.py` (order: customers → products → orders → DQ summary)
 - [ ] Add `_is_valid`, `_quality_issues`, `_validated_at` columns
 - [ ] Create `silver.data_quality_summary` reporting table

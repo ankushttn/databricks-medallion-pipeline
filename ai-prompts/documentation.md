@@ -2,6 +2,16 @@
 
 ## Session Log
 
+### 2026-08-15 — Data quality strategy
+
+**Goal:** Define formal DQ framework with 5 dimensions, 48 checks, metrics, multi-failure model.
+
+**Outcome:** `data-quality-strategy.md` v2.0 — complete check catalog, audit model, expected metrics.
+
+**Files touched:** `data-quality-strategy.md`, `cursor-workflow/task-breakdown.md`, `ai-prompts/documentation.md`
+
+---
+
 ### 2026-08-15 — Architecture & data model design
 
 **Goal:** Create architecture and data model design documents without implementation code.
