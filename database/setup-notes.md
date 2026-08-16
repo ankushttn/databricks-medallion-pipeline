@@ -10,11 +10,10 @@
 
 - CSV files live in `data/` and are read by Bronze ingestion scripts.
 - Delta tables are created at runtime on Databricks — no local metastore required.
-
-## Schema Application
-
-Run `database/schema.sql` on the Databricks SQL warehouse after customizing for your catalog naming.
+- **Static Bronze validation (no Spark):** `python src/bronze/validate_bronze_static.py --source-base-path data`
+- **Unit tests:** `pytest tests/test_bronze_ingest.py -v`
+- See `src/bronze/BRONZE_EXECUTION.md` for full Databricks runbook.
 
 ## Status
 
-_Foundation phase — setup scripts not yet implemented._
+_Bronze layer implemented — run on Databricks for Delta table creation._

@@ -34,18 +34,20 @@
 - [x] Update `DATA_GENERATION_NOTES.md`
 - [x] Add `tests/test_data_generation.py`
 
-## Phase 2 — Bronze Layer
+## Phase 2 — Bronze Layer ✅
 
-**Design reference:** `design-notes.md` §3, `data-model.md` §4
-
-- [ ] Implement `01_ingest_customers.py` → `bronze.customers`
-- [ ] Implement `02_ingest_orders.py` → `bronze.orders` (partitioned by `order_date`)
-- [ ] Implement `03_ingest_products.py` → `bronze.products`
-- [ ] Implement `ingest_all.py` orchestrator
-- [ ] Add `_ingested_at`, `_source_file` metadata columns
-- [ ] Implement error handling and logging per `design-notes.md` §9–10
-- [ ] Update `database/schema.sql` with Bronze DDL
-- [ ] Add `tests/test_bronze_ingest.py`
+- [x] Shared config (`config.py`) — env vars + CLI, DBFS/local paths
+- [x] Explicit schemas (`schemas.py`)
+- [x] Core ingest utilities (`ingest_utils.py`)
+- [x] Implement `01_ingest_customers.py` → `bronze.customers`
+- [x] Implement `02_ingest_orders.py` → `bronze.orders` (partitioned by `order_date`)
+- [x] Implement `03_ingest_products.py` → `bronze.products`
+- [x] Implement `ingest_all.py` orchestrator
+- [x] Metadata: `_ingested_at`, `_source_file`
+- [x] Static validation (`validate_bronze_static.py`)
+- [x] Databricks execution guide (`BRONZE_EXECUTION.md`)
+- [x] `tests/test_bronze_ingest.py` (10 tests passing)
+- [ ] Full Delta integration test on Databricks cluster (manual)
 
 ## Phase 3 — Silver Layer
 
