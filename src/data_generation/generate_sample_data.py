@@ -111,6 +111,17 @@ DEFECT_COUNTS = DefectCounts()
 
 
 @dataclass(frozen=True)
+class SupplementaryDefectCounts:
+    """Additional defects to reach the assignment ~700 Silver invalid-row target (A-07)."""
+
+    price_below_cost: int = 210
+
+
+SUPPLEMENTARY_DEFECT_COUNTS = SupplementaryDefectCounts()
+TARGET_SILVER_INVALID_ROWS = 700
+
+
+@dataclass(frozen=True)
 class GenerationConfig:
     """Runtime configuration for data generation."""
 
@@ -120,6 +131,7 @@ class GenerationConfig:
     product_count: int = PRODUCT_COUNT
     order_count: int = ORDER_COUNT
     defects: DefectCounts = DEFECT_COUNTS
+    supplementary: SupplementaryDefectCounts = SUPPLEMENTARY_DEFECT_COUNTS
 
 
 # ---------------------------------------------------------------------------
@@ -242,6 +254,31 @@ def inject_customer_defects(
         result.append(duplicate_row)
 
     return result
+
+
+def inject_product_supplementary_defects(
+    products: list[dict[str, Any]],
+    rng: Random,
+    count: int,
+) -> set[int]:
+    """Inject business-logic defects (price below cost) on clean product rows."""
+    if count <= 0:
+        return set()
+    if count > len(products):
+        raise DataGenerationValidationError(
+            f"Cannot inject {count} product supplementary defects into {len(products)} rows"
+        )
+    logger.info(
+        "Injecting supplementary product defects: %d rows with cost > price",
+        count,
+    )
+    indices = rng.sample(range(len(products)), count)
+    affected_ids: set[int] = set()
+    for idx in indices:
+        price = float(products[idx]["price"])
+        products[idx]["cost"] = _format_decimal(price + 10.0)
+        affected_ids.add(int(products[idx]["product_id"]))
+    return affected_ids
 
 
 def generate_products(rng: Random, count: int) -> list[dict[str, Any]]:
@@ -504,6 +541,34 @@ def validate_defect_counts(
     logger.info("All intentional defect counts verified successfully")
 
 
+def validate_supplementary_defect_counts(
+    products: list[dict[str, Any]],
+    supplementary_product_ids: set[int],
+    supplementary: SupplementaryDefectCounts,
+) -> None:
+    """Verify supplementary product business-logic defects were applied as designed."""
+    if supplementary.price_below_cost <= 0:
+        return
+    below_cost = [
+        int(row["product_id"])
+        for row in products
+        if float(row["cost"]) > float(row["price"])
+    ]
+    if len(below_cost) != supplementary.price_below_cost:
+        raise DataGenerationValidationError(
+            f"price_below_cost products: expected {supplementary.price_below_cost}, "
+            f"got {len(below_cost)}"
+        )
+    if set(below_cost) != supplementary_product_ids:
+        raise DataGenerationValidationError(
+            "Supplementary price_below_cost product IDs do not match injected set"
+        )
+    logger.info(
+        "Supplementary product defects verified: %d price_below_cost rows",
+        supplementary.price_below_cost,
+    )
+
+
 def validate_no_uncontrolled_issues(
     customers: list[dict[str, Any]],
     products: list[dict[str, Any]],
@@ -511,10 +576,12 @@ def validate_no_uncontrolled_issues(
     defects: DefectCounts,
     customer_count: int,
     product_count: int,
+    supplementary_product_ids: set[int] | None = None,
 ) -> None:
     """Ensure clean rows do not contain unexpected quality problems."""
     logger.info("Validating absence of uncontrolled quality issues")
     errors: list[str] = []
+    supplementary_product_ids = supplementary_product_ids or set()
 
     customer_id_counts = Counter(row["customer_id"] for row in customers)
     twice_customer_ids = [k for k, v in customer_id_counts.items() if v == 2]
@@ -551,6 +618,8 @@ def validate_no_uncontrolled_issues(
         errors.append("duplicate product_id in products (uncontrolled)")
     for i, row in enumerate(products):
         row_errors: list[str] = []
+        product_id = int(row["product_id"])
+        is_supplementary = product_id in supplementary_product_ids
         if float(row["price"]) <= 0:
             row_errors.append("non-positive price")
         if float(row["cost"]) < 0:
@@ -559,6 +628,11 @@ def validate_no_uncontrolled_issues(
             row_errors.append("negative stock_quantity")
         if int(row["reorder_level"]) < 0:
             row_errors.append("negative reorder_level")
+        if is_supplementary:
+            if float(row["cost"]) <= float(row["price"]):
+                row_errors.append("supplementary defect missing: cost must exceed price")
+        elif float(row["cost"]) > float(row["price"]):
+            row_errors.append("uncontrolled price_below_cost")
         if row_errors:
             errors.append(f"product row {i} (id={row['product_id']}): {row_errors}")
 
@@ -652,8 +726,10 @@ def validate_generated_data(
     products: list[dict[str, Any]],
     orders: list[dict[str, Any]],
     config: GenerationConfig,
+    supplementary_product_ids: set[int] | None = None,
 ) -> None:
     """Run all validation checks; raise DataGenerationValidationError on failure."""
+    supplementary_product_ids = supplementary_product_ids or set()
     validate_row_counts(customers, products, orders, config)
     validate_defect_counts(
         customers,
@@ -662,6 +738,11 @@ def validate_generated_data(
         config.customer_count,
         config.product_count,
     )
+    validate_supplementary_defect_counts(
+        products,
+        supplementary_product_ids,
+        config.supplementary,
+    )
     validate_no_uncontrolled_issues(
         customers,
         products,
@@ -669,6 +750,7 @@ def validate_generated_data(
         config.defects,
         config.customer_count,
         config.product_count,
+        supplementary_product_ids,
     )
 
 
@@ -699,7 +781,19 @@ def generate_all(config: GenerationConfig) -> tuple[
         range(1, config.product_count + 1),
     )
 
-    validate_generated_data(customers, products, orders, config)
+    supplementary_product_ids = inject_product_supplementary_defects(
+        products,
+        rng,
+        config.supplementary.price_below_cost,
+    )
+
+    validate_generated_data(
+        customers,
+        products,
+        orders,
+        config,
+        supplementary_product_ids,
+    )
     return customers, products, orders
 
 

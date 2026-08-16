@@ -1,7 +1,7 @@
 # Silver Quality Validation Report
 
-**Run ID:** `silver-validation-001`  
-**Validated at:** 2026-08-16T02:36:05.716963  
+**Run ID:** `20260816T064521Z`  
+**Validated at:** 2026-08-16T06:45:21.021251  
 **Mandatory checks:** PASS
 
 ## Entity Summary
@@ -9,7 +9,7 @@
 | table_name | total_rows | passed_rows | failed_rows | pass_percentage | failure_percentage |
 |------------|------------|-------------|-------------|-----------------|---------------------|
 | silver.customers | 10,010 | 9,940 | 70 | 99.30% | 0.70% |
-| silver.products | 500 | 500 | 0 | 100.00% | 0.00% |
+| silver.products | 500 | 290 | 210 | 58.00% | 42.00% |
 | silver.orders | 100,020 | 99,600 | 420 | 99.58% | 0.42% |
 
 ## Per-Check Results
@@ -42,7 +42,7 @@
 | unit_price decimal validation | silver.orders | 100,020 | 100,020 | 0 | 100.00% | 0.00% | `type:unit_price_invalid` |
 | orders primary key uniqueness | silver.orders | 100,020 | 99,980 | 40 | 99.96% | 0.04% | `uniqueness:duplicate_order_id` |
 | cost non-negative | silver.products | 500 | 500 | 0 | 100.00% | 0.00% | `business:negative_cost` |
-| price not below cost | silver.products | 500 | 500 | 0 | 100.00% | 0.00% | `business:price_below_cost` |
+| price not below cost | silver.products | 500 | 290 | 210 | 58.00% | 42.00% | `business:price_below_cost` |
 | price positive | silver.products | 500 | 500 | 0 | 100.00% | 0.00% | `business:non_positive_price` |
 | reorder level non-negative | silver.products | 500 | 500 | 0 | 100.00% | 0.00% | `business:negative_reorder_level` |
 | stock quantity non-negative | silver.products | 500 | 500 | 0 | 100.00% | 0.00% | `business:negative_stock_quantity` |
@@ -60,6 +60,7 @@
 |--------|-------|----------|--------|--------|
 | customers | NULL emails (`completeness:email_null`) | == 50 | 50 | PASS |
 | customers | duplicate customer_id rows (`uniqueness:duplicate_customer_id`) | >= 10 | 20 | PASS |
+| products | price below cost (supplementary defects) (`business:price_below_cost`) | == 210 | 210 | PASS |
 | orders | NULL customer_id (`completeness:customer_id_null`) | == 100 | 100 | PASS |
 | orders | NULL product_id (`completeness:product_id_null`) | == 200 | 200 | PASS |
 | orders | invalid customer_id (`referential:invalid_customer_id`) | == 50 | 50 | PASS |
@@ -74,6 +75,7 @@ _No unexpected check failures detected._
 
 | check_name | table_name | failed_rows | failure_percentage | issue_code |
 |------------|------------|-------------|---------------------|------------|
+| price not below cost | silver.products | 210 | 42.00% | `business:price_below_cost` |
 | product_id completeness | silver.orders | 200 | 0.20% | `completeness:product_id_null` |
 | customer_id completeness | silver.orders | 100 | 0.10% | `completeness:customer_id_null` |
 | email completeness | silver.customers | 50 | 0.50% | `completeness:email_null` |

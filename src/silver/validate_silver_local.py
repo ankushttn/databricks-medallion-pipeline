@@ -26,7 +26,7 @@ from bronze.schemas import (
     ORDERS_BRONZE_SCHEMA,
     PRODUCTS_BRONZE_SCHEMA,
 )
-from silver.constants import EXPECTED_DEFECT_COUNTS
+from silver.constants import EXPECTED_DEFECT_COUNTS, EXPECTED_SUPPLEMENTARY_DEFECT_COUNTS
 from silver.metrics import build_check_summary, build_entity_metrics
 from silver.quality_engine import apply_all_dimensions, setup_logging
 from silver.quality_framework import QualityCheck, QualityContext
@@ -37,6 +37,12 @@ MANDATORY_CHECKS = {
     "customers": {
         "completeness:email_null": {"expected": 50, "label": "NULL emails"},
         "uniqueness:duplicate_customer_id": {"expected": 10, "label": "duplicate customer_id rows", "min_rows": True},
+    },
+    "products": {
+        "business:price_below_cost": {
+            "expected": EXPECTED_SUPPLEMENTARY_DEFECT_COUNTS["business:price_below_cost"],
+            "label": "price below cost (supplementary defects)",
+        },
     },
     "orders": {
         "completeness:customer_id_null": {"expected": 100, "label": "NULL customer_id"},
@@ -291,13 +297,16 @@ def run_local_validation(data_dir: Path, run_id: str | None = None) -> Validatio
     mandatory_passed = True
     for entity, silver_df in (
         ("customers", silver_customers),
+        ("products", silver_products),
         ("orders", silver_orders),
     ):
         results, passed = verify_mandatory_checks(entity, silver_df)
         mandatory_results.extend(results)
         mandatory_passed = mandatory_passed and passed
 
-    mandatory_codes = set(EXPECTED_DEFECT_COUNTS.keys())
+    mandatory_codes = set(EXPECTED_DEFECT_COUNTS.keys()) | set(
+        EXPECTED_SUPPLEMENTARY_DEFECT_COUNTS.keys()
+    )
     unexpected = find_unexpected_failures(check_metrics, mandatory_codes)
 
     return ValidationOutcome(

@@ -53,11 +53,12 @@ def test_invalid_order_status_fails_business_not_type(spark) -> None:
     assert issue_count(silver_df, "business:invalid_order_status") == 0
 
 
-def test_sample_data_products_have_zero_type_failures(silver_tables) -> None:
-    """Products were generated without intentional defects — all type checks pass."""
+def test_sample_data_products_have_expected_business_defects(silver_tables) -> None:
+    """Products include supplementary price_below_cost defects for the ~700-row target."""
     products = silver_tables["products"]
     invalid = products.filter(~F.col("_is_valid")).count()
-    assert invalid == 0
+    assert invalid == 210
+    assert issue_count(products, "business:price_below_cost") == 210
 
 
 def test_sample_data_clean_customers_pass_type_checks(silver_tables) -> None:

@@ -6,7 +6,7 @@ A production-oriented **Bronze → Silver → Gold** analytics pipeline for e-co
 
 | Capability | Status |
 |------------|--------|
-| Local validation (PySpark + CSV) | **Verified** — 120 automated tests pass; local validation scripts produce reports in `data/` |
+| Local validation (PySpark + CSV) | **Verified** — 123 automated tests pass; local validation scripts produce reports in `data/` |
 | Databricks Delta execution | **Documented, not verified here** — follow §17; no CI run against a live workspace in this repo |
 | Databricks SQL Dashboard UI | **Not built** — SQL queries and setup guide only (`src/dashboard/`) |
 

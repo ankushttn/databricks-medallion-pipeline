@@ -119,17 +119,20 @@ Defects are injected into **disjoint row sets** — no uncontrolled compound def
 
 ### Products
 
-**No intentional defects.** All 500 rows are fully valid.
+| Defect | Count | Implementation | Silver check |
+|--------|-------|----------------|--------------|
+| `price_below_cost` (supplementary) | **210** | `cost = price + 10.00` on sampled products | `business:price_below_cost` |
+
+Remaining **290** products are fully valid.
 
 ### Estimated Problematic Rows (post-Silver)
 
-| Entity | Rows with ≥1 intentional issue |
-|--------|----------------------------------|
-| Customers | ~70 (50 NULL email + 20 duplicate-PK rows) |
-| Orders | ~420 (380 modified + 40 duplicate-PK rows, disjoint sets) |
-| **Total** | **~490** |
-
-> The assignment's ~700 problematic-row target will be approached when Silver business-logic checks run (e.g., `payment_before_order` edge cases are not injected at source). Source data contains **only** the 7 specified defect types.
+| Entity | Rows with `_is_valid = false` |
+|--------|-------------------------------|
+| Customers | 70 (50 NULL email + 20 duplicate-PK rows) |
+| Products | 210 (supplementary `price_below_cost`) |
+| Orders | 420 (380 modified + 40 duplicate-PK rows, disjoint sets) |
+| **Total** | **700** |
 
 ---
 
@@ -216,8 +219,9 @@ pytest tests/test_data_generation.py -v
 
 | Limitation | Notes |
 |------------|-------|
-| **~700 problematic rows** | Source data yields ~490 intentionally problematic rows; remaining gap expected from Silver business-logic flags, not additional source defects |
-| **No product defects** | Products are intentionally clean per assignment spec |
+| **~700 problematic rows** | 490 mandatory + 210 supplementary `price_below_cost` product defects = **700** Silver invalid rows |
+| **Supplementary product defects** | 210 products with `cost > price` (`business:price_below_cost`) per assignment A-07 |
+| **Mandatory product defects** | None — products are clean except supplementary business-logic rows |
 | **NULL representation** | Empty CSV strings; Bronze must preserve as-is for Silver to detect |
 | **Duplicate rows** | Appended copies (not in-place overwrites); row count exceeds base by 10/20 |
 | **Invalid FK ranges** | Hardcoded `800xxx` / `700xxx` — must not overlap valid ID ranges |

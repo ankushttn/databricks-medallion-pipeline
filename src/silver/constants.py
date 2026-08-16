@@ -24,6 +24,14 @@ EXPECTED_DEFECT_COUNTS = {
     "uniqueness:duplicate_order_id": 20,
 }
 
+# Supplementary source defects (business logic) to reach ~700 Silver invalid rows.
+EXPECTED_SUPPLEMENTARY_DEFECT_COUNTS = {
+    "business:price_below_cost": 210,
+}
+
+TARGET_SILVER_INVALID_ROWS = 700
+TARGET_SILVER_INVALID_TOLERANCE = 20
+
 ENTITY_PRIMARY_KEYS = {
     "customers": "customer_id",
     "products": "product_id",

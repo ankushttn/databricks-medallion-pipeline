@@ -1,7 +1,7 @@
 # Dashboard Query Validation Report
 
 **Run ID:** `dashboard-validation-001`  
-**Validated at:** 2026-08-16T03:22:15.270911+00:00  
+**Validated at:** 2026-08-16T06:21:04.947547+00:00  
 **Status:** PASS
 
 Local validation executes each query in `dashboard_queries.sql` against

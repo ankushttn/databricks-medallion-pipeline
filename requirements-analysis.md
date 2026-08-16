@@ -2,7 +2,7 @@
 
 **Project:** E-Commerce Medallion Architecture Data Pipeline  
 **Version:** 1.0  
-**Status:** Foundation complete — implementation pending  
+**Status:** Implementation complete locally — Databricks deployment verification pending (`scripts/DATABRICKS_E2E_VALIDATION.md`)  
 **Source of truth:** Assignment specification, project `cursor-workflow/spec.md`, and repository design documents
 
 ---
@@ -105,19 +105,19 @@ Git + Cursor      →  Version control and AI-assisted development
 | Column | Type | Required | Notes |
 |--------|------|----------|-------|
 | `customer_id` | string | Yes | Must be unique in valid set |
-| `name` | string | Yes | |
+| `customer_name` | string | Yes | |
 | `email` | string | Yes | Completeness check target |
-| `segment` | string | Yes | Used in Gold segmentation |
-| `created_at` | timestamp/date | Yes | |
+| `segment` | string | Yes | Column name in CSV: `customer_segment` |
+| `created_at` | timestamp/date | Yes | Column name in CSV: `signup_date` |
 
 **Products**
 
 | Column | Type | Required | Notes |
 |--------|------|----------|-------|
 | `product_id` | string | Yes | Must be unique in valid set |
-| `name` | string | Yes | |
+| `product_name` | string | Yes | Column name in CSV: `product_name` |
 | `category` | string | Yes | |
-| `unit_price` | decimal | Yes | Business-logic validation target |
+| `unit_price` | decimal | Yes | Column name in CSV: `price`; business-logic validation target |
 
 **Orders**
 
@@ -448,36 +448,40 @@ The assignment requires the generated dataset to contain **approximately 700 row
 
 | Requirement ID | Requirement | Implementation File | Test | Expected Result | Status |
 |----------------|-------------|---------------------|------|-----------------|--------|
-| FR-01 | Deterministic sample data generation | `src/data_generation/generate_sample_data.py` | `tests/test_data_generation.py` | Identical CSVs on repeated runs | Pending |
-| FR-02 | Inject intentional DQ defects (§6.4) | `src/data_generation/generate_sample_data.py` | `tests/test_data_generation.py` | 50 NULL emails, 10 dup customer_id, 100 NULL customer_id, 200 NULL product_id, 50 invalid customer_id, 30 invalid product_id, 20 dup order_id | Pending |
-| FR-03 | Bronze ingest all CSVs | `src/bronze/01_*.py`, `ingest_all.py` | `tests/test_bronze_ingest.py` | Delta tables populated; raw values preserved | Pending |
-| FR-04 | Five Silver quality dimensions | `src/silver/01_–05_*.py` | `tests/test_silver_quality.py` | All dimensions execute; flags set | Pending |
-| FR-05 | Flag, don't delete bad records | `src/silver/create_silver_tables.py` | `tests/test_silver_quality.py` | Bronze row count = Silver row count | Pending |
-| FR-06 | Four Gold aggregations | `src/gold/01_–04_*.sql`, `create_gold_tables.py` | `tests/test_gold_aggregations.py` | Four Gold tables exist with correct metrics | Pending |
-| FR-07 | Dashboard queries | `src/dashboard/dashboard_queries.sql` | Manual / integration validation | Queries return results from Gold | Pending |
-| FR-08 | Bronze orchestrator | `src/bronze/ingest_all.py` | `tests/test_bronze_ingest.py` | All three entities ingested in one run | Pending |
-| FR-09 | Silver orchestrator | `src/silver/create_silver_tables.py` | `tests/test_silver_quality.py` | All Silver tables created with quality metadata | Pending |
-| FR-10 | Gold orchestrator | `src/gold/create_gold_tables.py` | `tests/test_gold_aggregations.py` | All Gold tables built from SQL scripts | Pending |
-| FR-11 | Quality metrics logging | `src/silver/create_silver_tables.py` | `tests/test_silver_quality.py` | Logs show total/valid/invalid/issue breakdown | Pending |
-| SD-05 | ~700 problematic rows | `src/data_generation/generate_sample_data.py` | `tests/test_data_generation.py` | Silver `invalid_records` ≈ 700 | Pending |
-| DQ-C01 | 50 NULL emails | `src/silver/01_quality_completeness.py` | `tests/test_silver_quality.py` | 50 rows flagged `completeness:email_null` | Pending |
-| DQ-C02 | 10 duplicate customer_id | `src/silver/02_quality_uniqueness.py` | `tests/test_silver_quality.py` | 10+ rows flagged for duplicate customer_id | Pending |
-| DQ-O01 | 100 NULL customer_id | `src/silver/01_quality_completeness.py` | `tests/test_silver_quality.py` | 100 rows flagged `completeness:customer_id_null` | Pending |
-| DQ-O02 | 200 NULL product_id | `src/silver/01_quality_completeness.py` | `tests/test_silver_quality.py` | 200 rows flagged `completeness:product_id_null` | Pending |
-| DQ-O03 | 50 invalid customer_id | `src/silver/04_quality_referential_integrity.py` | `tests/test_silver_quality.py` | 50 rows flagged `referential:invalid_customer_id` | Pending |
-| DQ-O04 | 30 invalid product_id | `src/silver/04_quality_referential_integrity.py` | `tests/test_silver_quality.py` | 30 rows flagged `referential:invalid_product_id` | Pending |
-| DQ-O05 | 20 duplicate order_id | `src/silver/02_quality_uniqueness.py` | `tests/test_silver_quality.py` | 20+ rows flagged for duplicate order_id | Pending |
-| BR-05 | Bronze preserves raw data | `src/bronze/01_–03_*.py` | `tests/test_bronze_ingest.py` | Column values match CSV source | Pending |
-| BR-06 | Bronze ingestion metadata | `src/bronze/01_–03_*.py` | `tests/test_bronze_ingest.py` | `_ingested_at`, `_source_file` populated | Pending |
-| SV-08 | `_is_valid` logic | `src/silver/create_silver_tables.py` | `tests/test_silver_quality.py` | `true` only when zero issues | Pending |
-| SV-09 | `_quality_issues` array | `src/silver/01_–05_*.py` | `tests/test_silver_quality.py` | Failed checks listed per row | Pending |
-| GD-01 | Gold reads valid Silver only | `src/gold/01_–04_*.sql` | `tests/test_gold_aggregations.py` | Invalid rows excluded from aggregates | Pending |
-| NFR-04 | No hardcoded secrets | All `src/**/*.py` | Code review | No tokens/passwords in repo | Pending |
-| NFR-06 | Tests for major components | `tests/` | `pytest` | All tests pass | Pending |
-| AI-03 | AI session documentation | `ai-prompts/*.md` | Manual review | Each layer session logged | In Progress |
-| DC-03 | Requirements analysis | `requirements-analysis.md` | Manual review | This document complete | **Complete** |
-| AC-08 | End-to-end pipeline on Databricks | All `src/` layers | Integration test / manual | Bronze → Silver → Gold succeeds | Pending |
-| VC-04 | Secrets excluded from Git | `.gitignore` | Manual review | No secrets tracked | Complete |
+| FR-01 | Deterministic sample data generation | `src/data_generation/generate_sample_data.py` | `tests/data_generation/` | Identical CSVs on repeated runs | **Pass** |
+| FR-02 | Inject intentional DQ defects (§6.4) | `src/data_generation/generate_sample_data.py` | `tests/data_generation/test_intentional_defects.py` | Mandatory defect counts match | **Pass** |
+| FR-03 | Bronze ingest all CSVs | `src/bronze/01_*.py`, `ingest_all.py` | `tests/bronze/` | Raw values preserved locally | **Pass** (local) |
+| FR-04 | Five Silver quality dimensions | `src/silver/01_–05_*.py` | `tests/silver/` | All dimensions execute; flags set | **Pass** |
+| FR-05 | Flag, don't delete bad records | `src/silver/create_silver_tables.py` | `tests/integration/test_medallion_pipeline.py` | Bronze row count = Silver row count | **Pass** |
+| FR-06 | Four Gold aggregations | `src/gold/01_–04_*.sql` | `tests/gold/` | Four Gold tables; reconciliation PASS | **Pass** |
+| FR-07 | Dashboard queries | `src/dashboard/dashboard_queries.sql` | `tests/dashboard/` | 12/12 local validation PASS | **Pass** (local SQL) |
+| FR-08 | Bronze orchestrator | `src/bronze/ingest_all.py` | `tests/bronze/` | Three entities ingested | **Pass** |
+| FR-09 | Silver orchestrator | `src/silver/create_silver_tables.py` | `tests/silver/test_silver_integration.py` | Quality metadata emitted | **Pass** |
+| FR-10 | Gold orchestrator | `src/gold/create_gold_tables.py` | `tests/gold/` | All Gold tables built | **Pass** |
+| FR-11 | Quality metrics logging | `src/silver/metrics.py` | `tests/silver/test_silver_metrics.py` | valid/invalid/issue breakdown | **Pass** |
+| SD-05 | ~700 problematic rows | `generate_sample_data.py` (210 supplementary product defects) | `tests/integration/test_medallion_pipeline.py` | Silver invalid sum = 700 | **Pass** |
+| DQ-C01 | 50 NULL emails | `01_quality_completeness.py` | `tests/silver/test_silver_completeness.py` | 50 rows flagged | **Pass** |
+| DQ-C02 | 10 duplicate customer_id | `02_quality_uniqueness.py` | `tests/silver/test_silver_uniqueness.py` | ≥10 rows flagged | **Pass** |
+| DQ-O01 | 100 NULL customer_id | `01_quality_completeness.py` | Silver validation report | 100 rows flagged | **Pass** |
+| DQ-O02 | 200 NULL product_id | `01_quality_completeness.py` | Silver validation report | 200 rows flagged | **Pass** |
+| DQ-O03 | 50 invalid customer_id | `04_quality_referential_integrity.py` | Silver validation report | 50 rows flagged | **Pass** |
+| DQ-O04 | 30 invalid product_id | `04_quality_referential_integrity.py` | Silver validation report | 30 rows flagged | **Pass** |
+| DQ-O05 | 20 duplicate order_id | `02_quality_uniqueness.py` | Silver validation report | ≥20 rows flagged | **Pass** |
+| BR-05 | Bronze preserves raw data | `src/bronze/ingest_utils.py` | `tests/bronze/test_bronze_spark_read.py` | Column values match CSV | **Pass** |
+| BR-06 | Bronze ingestion metadata | `ingest_utils.py` | `tests/bronze/test_bronze_spark_read.py` | Metadata columns present | **Pass** |
+| BR-07 | Delta Lake writes | `ingest_utils.write_bronze_delta` | `tests/bronze/test_bronze_delta_write.py` | `.format("delta")` verified | **Pass** (unit); workspace pending |
+| SV-08 | `_is_valid` logic | `quality_framework.py` | `tests/silver/` | true only when zero issues | **Pass** |
+| SV-09 | `_quality_issues` array | `01_–05_*.py` | `tests/silver/` | Issue codes per row | **Pass** |
+| GD-01 | Gold reads valid Silver only | `src/gold/01_–04_*.sql` | `tests/gold/test_gold_aggregations.py` | Invalid rows excluded | **Pass** |
+| NFR-04 | No hardcoded secrets | `src/**/*.py` | Code review | No tokens in repo | **Pass** |
+| NFR-06 | Tests for major components | `tests/` | `pytest` (122 tests) | All pass locally | **Pass** |
+| AI-03 | AI session documentation | `ai-prompts/*.md` | Manual review | Layer sessions logged | **Pass** |
+| AI-07 | Final AI summary | `final-ai-usage-summary.md` | Manual review | Updated 2026-08-16 | **Pass** |
+| DC-03 | Requirements analysis | `requirements-analysis.md` | Manual review | This document | **Pass** |
+| TR-09 | Schema reference | `database/schema.sql` | Manual review | Bronze/Silver/Gold DDL | **Pass** |
+| AC-08 | End-to-end on Databricks | All `src/` layers | `scripts/DATABRICKS_E2E_VALIDATION.md` | Workspace checklist | **Pending** (manual) |
+| AC-12 | Submission artifacts | `candidate-info.md`, `reflection.md` | Manual review | Completed | **Pass** |
+| VC-04 | Secrets excluded from Git | `.gitignore` | Manual review | No secrets tracked | **Pass** |
 
 ---
 
@@ -507,7 +511,7 @@ The assignment requires the generated dataset to contain **approximately 700 row
 | 20. Clarifications/questions | ✅ |
 | Traceability matrix | ✅ — 35 requirements mapped |
 
-**Gaps flagged for resolution during implementation:** Q-01 (reconciling 460 specified instances to ~700 problematic rows), Q-03 (Bronze idempotency), Q-05 (product-level defects).
+**Gaps flagged for resolution during implementation:** Q-03 (Bronze idempotency). Q-01 and Q-05 resolved via 210 supplementary product defects (see `DATA_GENERATION_NOTES.md`).
 
 ---
 

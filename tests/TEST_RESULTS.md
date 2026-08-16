@@ -1,8 +1,8 @@
 # Test Results
 
-**Run date:** 2026-08-16 (post production-readiness review)  
-**Command:** `python -m pytest tests/ -v`  
-**Result:** **120 passed** in 528s (~8m 48s)  
+**Run date:** 2026-08-16 (acceptance-report fixes)  
+**Command:** `python -m pytest tests/ -q`  
+**Result:** **123 passed** in 566s (~9m 26s)  
 **Environment:** Windows, Python 3.10.9, PySpark local[1]
 
 ## Summary by layer
@@ -11,7 +11,7 @@
 |-------|-------|--------|
 | Data generation | 9 | PASS |
 | Intentional defects (CSV validator) | 4 | PASS |
-| Bronze config + Spark read | 15 | PASS |
+| Bronze config + Spark read + Delta write | 17 | PASS |
 | Silver integration | 8 | PASS |
 | Silver completeness | 5 | PASS |
 | Silver uniqueness | 6 | PASS |
@@ -23,45 +23,21 @@
 | Gold reconciliation | 11 | PASS |
 | Gold segmentation | 8 | PASS |
 | Dashboard queries | 12 | PASS |
-| Integration (end-to-end) | 5 | PASS |
+| Integration (end-to-end) | 6 | PASS |
 | Common (config validation) | 8 | PASS |
 
 ## Business outcomes verified
 
-### Positive cases
-- Valid synthetic customers, products, and orders pass dimension checks
-- Clean product rows (no intentional defects) are 100% valid
-- Clean order subsets pass business-rule checks
-- Gold KPIs reconcile to Silver valid-order counts
-- Dashboard KPI totals match `gold.daily_weekly_trends` (DAILY grain)
+- Sample data: 10,010 customers, 500 products, 100,020 orders (seed 42)
+- Mandatory §6.4 defects detected in Silver
+- **700 invalid Silver rows** (70 customers + 210 products + 420 orders)
+- 210 supplementary `business:price_below_cost` product defects
+- Gold reconciliation 11/11 PASS
+- Dashboard SQL validation 12/12 PASS (local)
 
-### Negative cases
-- 50 NULL emails flagged (`completeness:email_null`)
-- 100 NULL `customer_id`, 200 NULL `product_id` on orders
-- 50 invalid customer FKs, 30 invalid product FKs
-- 20 duplicate customer rows (40 flagged), 40 duplicate order rows (80 flagged)
-- 420 invalid orders excluded from Gold aggregations
-- Invalid email format, bad segment, amount mismatch, payment-date violations detected in synthetic tests
+## Changes from prior run
 
-### Gold / segmentation
-- Segment counts (seed 42): High-Value 9,652 / Repeat 284 / One-Time 4
-- Independent reconciliation: 11 checks + 10 entity traces PASS
-- `classify_segment()` priority rules verified at boundaries
-
-## Fixes applied during test harness build
-
-1. **Python worker mismatch (Windows):** Set `PYSPARK_PYTHON` and `PYSPARK_DRIVER_PYTHON` to `sys.executable` in `tests/conftest.py`.
-2. **Test ordering:** Silver layer runs before Gold/Dashboard/Integration to reduce Spark session strain.
-3. **Avoid fragile `collect()`:** Dimension tests use `filter().count()` where possible.
-
-## Re-run
-
-```bash
-python -m pytest tests/ -v
-```
-
-Fast subset:
-
-```bash
-python -m pytest tests/ -m unit -v
-```
+- Added 210 supplementary product `price_below_cost` defects to meet ~700-row target
+- Added Bronze Delta format unit tests (`test_bronze_delta_write.py`)
+- Added integration test `test_silver_total_invalid_rows_near_assignment_target`
+- Fixed Gold reconciliation comparator for invalid-product exclusion
