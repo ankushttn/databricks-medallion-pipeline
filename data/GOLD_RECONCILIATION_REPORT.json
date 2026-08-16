@@ -1,0 +1,246 @@
+{
+  "run_id": "gold-reconciliation-001",
+  "all_passed": true,
+  "results": [
+    {
+      "check_name": "sales_by_product_metrics",
+      "table_name": "gold.sales_by_product",
+      "passed": true,
+      "gold_value": "keys=500",
+      "expected_value": "keys=500",
+      "detail": "missing_keys=0 metric_mismatches=0"
+    },
+    {
+      "check_name": "revenue_by_customer_metrics",
+      "table_name": "gold.revenue_by_customer",
+      "passed": true,
+      "gold_value": "keys=9940",
+      "expected_value": "keys=9940",
+      "detail": "missing_keys=0 metric_mismatches=0"
+    },
+    {
+      "check_name": "daily_trends_metrics",
+      "table_name": "gold.daily_weekly_trends",
+      "passed": true,
+      "gold_value": "keys=912",
+      "expected_value": "keys=912",
+      "detail": "missing_keys=0 metric_mismatches=0"
+    },
+    {
+      "check_name": "weekly_trends_metrics",
+      "table_name": "gold.daily_weekly_trends",
+      "passed": true,
+      "gold_value": "keys=132",
+      "expected_value": "keys=132",
+      "detail": "missing_keys=0 metric_mismatches=0"
+    },
+    {
+      "check_name": "daily_trends_order_total",
+      "table_name": "gold.daily_weekly_trends",
+      "passed": true,
+      "gold_value": "99600",
+      "expected_value": "99600",
+      "detail": "Sum of daily total_orders vs distinct valid order_id"
+    },
+    {
+      "check_name": "customer_segmentation_metrics",
+      "table_name": "gold.customer_segmentation",
+      "passed": true,
+      "gold_value": "keys=3",
+      "expected_value": "keys=3",
+      "detail": "missing_keys=0 metric_mismatches=0"
+    },
+    {
+      "check_name": "segmentation_python_loop",
+      "table_name": "gold.customer_segmentation",
+      "passed": true,
+      "gold_value": "{'High-Value': 9652, 'Repeat': 284, 'One-Time': 4}",
+      "expected_value": "{'High-Value': 9652, 'Repeat': 284, 'One-Time': 4, 'Inactive': 0}",
+      "detail": "Independent Python classification vs Gold SQL"
+    },
+    {
+      "check_name": "invalid_duplicates_excluded",
+      "table_name": "gold.sales_by_product",
+      "passed": true,
+      "gold_value": "74519828.18",
+      "expected_value": "all_orders=74821244.25",
+      "detail": "duplicate_invalid_orders=40"
+    },
+    {
+      "check_name": "null_fk_orders_excluded",
+      "table_name": "gold.sales_by_product",
+      "passed": true,
+      "gold_value": "74519828.18",
+      "expected_value": "74519828.18",
+      "detail": "null_customer_id_invalid_orders=100"
+    },
+    {
+      "check_name": "gold_revenue_matches_valid_inner_join",
+      "table_name": "gold.sales_by_product",
+      "passed": true,
+      "gold_value": "74519828.18",
+      "expected_value": "74519828.18",
+      "detail": "Gold product revenue sum vs valid order revenue (inner join may differ if orphan products)"
+    },
+    {
+      "check_name": "gold_sales_revenue_equals_valid_product_join",
+      "table_name": "gold.sales_by_product",
+      "passed": true,
+      "gold_value": "74519828.18",
+      "expected_value": "74519828.18",
+      "detail": "Gold total revenue vs valid orders with valid product"
+    },
+    {
+      "check_name": "orphan_valid_orders_identified",
+      "table_name": "gold.revenue_by_customer",
+      "passed": true,
+      "gold_value": "597",
+      "expected_value": ">0",
+      "detail": "Valid orders with invalid customers excluded from customer Gold"
+    }
+  ],
+  "product_traces": [
+    {
+      "entity_type": "product",
+      "entity_id": 83,
+      "bronze_order_rows": 186,
+      "silver_valid_order_rows": 186,
+      "silver_invalid_order_rows": 0,
+      "gold_total_orders": 186,
+      "gold_total_revenue": 218688.9,
+      "expected_total_orders": 186,
+      "expected_total_revenue": 218688.9,
+      "expected_avg_order_value": "1175.75",
+      "passed": true,
+      "notes": ""
+    },
+    {
+      "entity_type": "product",
+      "entity_id": 121,
+      "bronze_order_rows": 204,
+      "silver_valid_order_rows": 203,
+      "silver_invalid_order_rows": 1,
+      "gold_total_orders": 203,
+      "gold_total_revenue": 74970.27,
+      "expected_total_orders": 203,
+      "expected_total_revenue": 74970.27,
+      "expected_avg_order_value": "369.31",
+      "passed": true,
+      "notes": ""
+    },
+    {
+      "entity_type": "product",
+      "entity_id": 197,
+      "bronze_order_rows": 229,
+      "silver_valid_order_rows": 227,
+      "silver_invalid_order_rows": 2,
+      "gold_total_orders": 227,
+      "gold_total_revenue": 147654.18,
+      "expected_total_orders": 227,
+      "expected_total_revenue": 147654.18,
+      "expected_avg_order_value": "650.46",
+      "passed": true,
+      "notes": ""
+    },
+    {
+      "entity_type": "product",
+      "entity_id": 236,
+      "bronze_order_rows": 186,
+      "silver_valid_order_rows": 186,
+      "silver_invalid_order_rows": 0,
+      "gold_total_orders": 186,
+      "gold_total_revenue": 3522.36,
+      "expected_total_orders": 186,
+      "expected_total_revenue": 3522.36,
+      "expected_avg_order_value": "18.94",
+      "passed": true,
+      "notes": ""
+    },
+    {
+      "entity_type": "product",
+      "entity_id": 469,
+      "bronze_order_rows": 251,
+      "silver_valid_order_rows": 251,
+      "silver_invalid_order_rows": 0,
+      "gold_total_orders": 251,
+      "gold_total_revenue": 377486.72,
+      "expected_total_orders": 251,
+      "expected_total_revenue": 377486.72,
+      "expected_avg_order_value": "1503.93",
+      "passed": true,
+      "notes": ""
+    }
+  ],
+  "customer_traces": [
+    {
+      "entity_type": "customer",
+      "entity_id": 1,
+      "bronze_order_rows": 7,
+      "silver_valid_order_rows": 7,
+      "silver_invalid_order_rows": 0,
+      "gold_total_orders": 7,
+      "gold_total_revenue": 7050.21,
+      "expected_total_orders": 7,
+      "expected_total_revenue": 7050.21,
+      "expected_avg_order_value": "1007.17",
+      "passed": true,
+      "notes": "segment=High-Value"
+    },
+    {
+      "entity_type": "customer",
+      "entity_id": 10,
+      "bronze_order_rows": 3,
+      "silver_valid_order_rows": 3,
+      "silver_invalid_order_rows": 0,
+      "gold_total_orders": 3,
+      "gold_total_revenue": 2306.37,
+      "expected_total_orders": 3,
+      "expected_total_revenue": 2306.37,
+      "expected_avg_order_value": "768.79",
+      "passed": true,
+      "notes": "segment=Repeat"
+    },
+    {
+      "entity_type": "customer",
+      "entity_id": 866,
+      "bronze_order_rows": 1,
+      "silver_valid_order_rows": 1,
+      "silver_invalid_order_rows": 0,
+      "gold_total_orders": 1,
+      "gold_total_revenue": 796.25,
+      "expected_total_orders": 1,
+      "expected_total_revenue": 796.25,
+      "expected_avg_order_value": "796.25",
+      "passed": true,
+      "notes": "segment=One-Time"
+    },
+    {
+      "entity_type": "customer",
+      "entity_id": 1966,
+      "bronze_order_rows": 9,
+      "silver_valid_order_rows": 9,
+      "silver_invalid_order_rows": 0,
+      "gold_total_orders": null,
+      "gold_total_revenue": null,
+      "expected_total_orders": 9,
+      "expected_total_revenue": 9707.69,
+      "expected_avg_order_value": "1078.63",
+      "passed": true,
+      "notes": "Customer invalid in Silver \u2014 excluded from Gold customer table"
+    },
+    {
+      "entity_type": "customer",
+      "entity_id": 264,
+      "bronze_order_rows": 4,
+      "silver_valid_order_rows": 4,
+      "silver_invalid_order_rows": 0,
+      "gold_total_orders": null,
+      "gold_total_revenue": null,
+      "expected_total_orders": 4,
+      "expected_total_revenue": 2574.96,
+      "expected_avg_order_value": "643.74",
+      "passed": true,
+      "notes": "Customer invalid in Silver \u2014 excluded from Gold customer table"
+    }
+  ]
+}

@@ -76,8 +76,8 @@
 - [x] Filter Silver inputs to `_is_valid = true`
 - [x] Add `src/gold/validate_gold_local.py` and `tests/test_gold_aggregations.py`
 - [x] Document assumptions in `src/gold/GOLD_ARCHITECTURE.md`
+- [x] Senior reconciliation: `src/gold/reconciliation.py`, `reconcile_gold_local.py`, `tests/test_gold_reconciliation.py` (all PASS)
 - [ ] Update `database/schema.sql` with Gold DDL
-- [x] Add `tests/test_gold_aggregations.py`
 
 ## Phase 5 — Dashboard & Wrap-up
 
