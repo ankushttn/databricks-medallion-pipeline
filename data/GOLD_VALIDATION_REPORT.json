@@ -1,0 +1,196 @@
+{
+  "run_id": "gold-validation-001",
+  "validated_at": "2026-08-16T02:46:18.104614",
+  "all_passed": true,
+  "gold_table_counts": {
+    "gold_sales_by_product": 500,
+    "gold_revenue_by_customer": 9940,
+    "gold_daily_weekly_trends": 1044,
+    "gold_customer_segmentation": 3
+  },
+  "silver_valid_counts": {
+    "customers": 9940,
+    "products": 500,
+    "orders": 99600
+  },
+  "invalid_orders_excluded": 420,
+  "summary_rows": [
+    {
+      "check_name": "sales_by_product_summary",
+      "table_name": "gold.sales_by_product",
+      "total_rows": 500,
+      "passed_rows": 500,
+      "failed_rows": 0,
+      "pass_percentage": 100.0,
+      "failure_percentage": 0.0,
+      "detail": "orders=99600, revenue=74519828.18"
+    },
+    {
+      "check_name": "revenue_by_customer_summary",
+      "table_name": "gold.revenue_by_customer",
+      "total_rows": 9940,
+      "passed_rows": 9940,
+      "failed_rows": 0,
+      "pass_percentage": 100.0,
+      "failure_percentage": 0.0,
+      "detail": "orders=99003, revenue=74068955.73"
+    },
+    {
+      "check_name": "daily_weekly_trends_daily_summary",
+      "table_name": "gold.daily_weekly_trends",
+      "total_rows": 912,
+      "passed_rows": 912,
+      "failed_rows": 0,
+      "pass_percentage": 100.0,
+      "failure_percentage": 0.0,
+      "detail": "grain=DAILY, orders=99600, revenue=74519828.18"
+    },
+    {
+      "check_name": "daily_weekly_trends_weekly_summary",
+      "table_name": "gold.daily_weekly_trends",
+      "total_rows": 132,
+      "passed_rows": 132,
+      "failed_rows": 0,
+      "pass_percentage": 100.0,
+      "failure_percentage": 0.0,
+      "detail": "grain=WEEKLY, orders=99600, revenue=74519828.18"
+    },
+    {
+      "check_name": "segment_high_value",
+      "table_name": "gold.customer_segmentation",
+      "total_rows": 9652,
+      "passed_rows": 9652,
+      "failed_rows": 0,
+      "pass_percentage": 100.0,
+      "failure_percentage": 0.0,
+      "detail": "avg_revenue=7619.84, total_revenue=73546742.87"
+    },
+    {
+      "check_name": "segment_repeat",
+      "table_name": "gold.customer_segmentation",
+      "total_rows": 284,
+      "passed_rows": 284,
+      "failed_rows": 0,
+      "pass_percentage": 100.0,
+      "failure_percentage": 0.0,
+      "detail": "avg_revenue=1828.36, total_revenue=519253.12"
+    },
+    {
+      "check_name": "segment_one_time",
+      "table_name": "gold.customer_segmentation",
+      "total_rows": 4,
+      "passed_rows": 4,
+      "failed_rows": 0,
+      "pass_percentage": 100.0,
+      "failure_percentage": 0.0,
+      "detail": "avg_revenue=739.94, total_revenue=2959.74"
+    }
+  ],
+  "validation_results": [
+    {
+      "table_name": "gold.sales_by_product",
+      "validation_name": "no_null_product_keys",
+      "description": "Every row has a non-null product_id.",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "table_name": "gold.sales_by_product",
+      "validation_name": "non_negative_metrics",
+      "description": "Revenue and order counts are non-negative.",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "table_name": "gold.sales_by_product",
+      "validation_name": "avg_order_value_consistency",
+      "description": "avg_order_value equals total_revenue / total_orders when orders > 0.",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "table_name": "gold.sales_by_product",
+      "validation_name": "no_duplicate_products",
+      "description": "Grain is one row per product_id.",
+      "passed": true,
+      "detail": "rows=500 distinct_products=500"
+    },
+    {
+      "table_name": "gold.revenue_by_customer",
+      "validation_name": "no_null_customer_keys",
+      "description": "Every row has a non-null customer_id.",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "table_name": "gold.revenue_by_customer",
+      "validation_name": "lifetime_value_matches_revenue",
+      "description": "lifetime_value_actual equals total_revenue.",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "table_name": "gold.revenue_by_customer",
+      "validation_name": "avg_order_value_consistency",
+      "description": "avg_order_value equals total_revenue / total_orders when orders > 0.",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "table_name": "gold.revenue_by_customer",
+      "validation_name": "no_duplicate_customers",
+      "description": "Grain is one row per customer_id.",
+      "passed": true,
+      "detail": "rows=9940 distinct_customers=9940"
+    },
+    {
+      "table_name": "gold.daily_weekly_trends",
+      "validation_name": "no_null_dates",
+      "description": "Trend rows have non-null date and week.",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "table_name": "gold.daily_weekly_trends",
+      "validation_name": "avg_order_value_consistency",
+      "description": "avg_order_value equals total_revenue / total_orders when orders > 0.",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "table_name": "gold.daily_weekly_trends",
+      "validation_name": "daily_and_weekly_grains_present",
+      "description": "Both DAILY and WEEKLY trend grains exist.",
+      "passed": true,
+      "detail": "grains=[WEEKLY, DAILY]"
+    },
+    {
+      "table_name": "gold.customer_segmentation",
+      "validation_name": "segment_count_within_bounds",
+      "description": "At most four behavioral segment types; all values are allowed types.",
+      "passed": true,
+      "detail": "segments=[High-Value, Repeat, One-Time] count=3"
+    },
+    {
+      "table_name": "gold.customer_segmentation",
+      "validation_name": "customer_count_positive",
+      "description": "Each segment has at least one customer.",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "table_name": "gold.customer_segmentation",
+      "validation_name": "avg_revenue_consistency",
+      "description": "avg_revenue equals total_revenue / customer_count.",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "table_name": "gold.customer_segmentation",
+      "validation_name": "segment_types_allowed",
+      "description": "Only expected segment_type values are used.",
+      "passed": true,
+      "detail": "[]"
+    }
+  ]
+}
