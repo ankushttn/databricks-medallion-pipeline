@@ -1,0 +1,85 @@
+{
+  "run_id": "dashboard-validation-001",
+  "validated_at": "2026-08-16T03:22:15.270911+00:00",
+  "results": [
+    {
+      "query_name": "chart_customer_revenue_distribution",
+      "passed": true,
+      "row_count": 6,
+      "detail": "executed_ok rows=6"
+    },
+    {
+      "query_name": "chart_customer_segmentation",
+      "passed": true,
+      "row_count": 3,
+      "detail": "executed_ok rows=3"
+    },
+    {
+      "query_name": "chart_daily_revenue_trend",
+      "passed": true,
+      "row_count": 912,
+      "detail": "executed_ok rows=912"
+    },
+    {
+      "query_name": "chart_top_10_products_by_revenue",
+      "passed": true,
+      "row_count": 10,
+      "detail": "executed_ok rows=10"
+    },
+    {
+      "query_name": "chart_weekly_revenue_trend",
+      "passed": true,
+      "row_count": 132,
+      "detail": "executed_ok rows=132"
+    },
+    {
+      "query_name": "kpi_average_order_value",
+      "passed": true,
+      "row_count": 1,
+      "detail": "executed_ok rows=1"
+    },
+    {
+      "query_name": "kpi_total_customers",
+      "passed": true,
+      "row_count": 1,
+      "detail": "executed_ok rows=1"
+    },
+    {
+      "query_name": "kpi_total_orders",
+      "passed": true,
+      "row_count": 1,
+      "detail": "executed_ok rows=1"
+    },
+    {
+      "query_name": "kpi_total_revenue",
+      "passed": true,
+      "row_count": 1,
+      "detail": "executed_ok rows=1"
+    },
+    {
+      "query_name": "table_segment_performance",
+      "passed": true,
+      "row_count": 3,
+      "detail": "executed_ok rows=3"
+    },
+    {
+      "query_name": "table_top_10_customers_by_revenue",
+      "passed": true,
+      "row_count": 10,
+      "detail": "executed_ok rows=10"
+    },
+    {
+      "query_name": "kpi_cross_check_trends",
+      "passed": true,
+      "row_count": 1,
+      "detail": "KPI totals match gold.daily_weekly_trends DAILY grain"
+    }
+  ],
+  "kpi_snapshot": {
+    "total_revenue": 74519828.18,
+    "total_orders": 99600,
+    "avg_order_value": 748.19,
+    "total_customers": 9940
+  },
+  "all_passed": true
+}

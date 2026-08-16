@@ -83,8 +83,8 @@
 
 **Design reference:** `design-notes.md` §6
 
-- [ ] Implement `dashboard_queries.sql` (Gold tables only)
-- [ ] Complete `DASHBOARD_GUIDE.md` (Databricks SQL Dashboard setup)
+- [x] Implement `dashboard_queries.sql` (Gold tables only)
+- [x] Complete `DASHBOARD_GUIDE.md` (Databricks SQL Dashboard setup)
 - [ ] End-to-end validation on Databricks
 - [ ] Complete `reflection.md`
 - [ ] Complete `final-ai-usage-summary.md`
