@@ -68,8 +68,11 @@ def test_price_below_cost_fails(spark) -> None:
     assert issue_count(silver_df, "business:price_below_cost") == 1
 
 
-def test_sample_data_products_pass_all_business_rules(silver_tables) -> None:
-    assert silver_tables["products"].filter(~F.col("_is_valid")).count() == 0
+def test_sample_data_products_have_supplementary_business_defects(silver_tables) -> None:
+    products = silver_tables["products"]
+    invalid = products.filter(~F.col("_is_valid")).count()
+    assert invalid == 210
+    assert issue_count(products, "business:price_below_cost") == 210
 
 
 def test_sample_data_clean_orders_pass_business_rules(silver_tables) -> None:

@@ -437,6 +437,16 @@ def reconcile_duplicate_and_null_handling(
     all_orders_revenue = silver_orders.agg(F.sum("total_amount")).collect()[0][0]
     valid_revenue = valid_orders(silver_orders).agg(F.sum("total_amount")).collect()[0][0]
     gold_revenue = gold_sales.agg(F.sum("total_revenue")).collect()[0][0]
+    inner_rev = (
+        valid_orders(silver_orders)
+        .join(
+            valid_products(silver_products).select("product_id"),
+            on="product_id",
+            how="inner",
+        )
+        .agg(F.sum("total_amount"))
+        .collect()[0][0]
+    )
 
     results.append(
         ReconciliationResult(
@@ -462,24 +472,17 @@ def reconcile_duplicate_and_null_handling(
         ReconciliationResult(
             check_name="gold_revenue_matches_valid_inner_join",
             table_name="gold.sales_by_product",
-            passed=_decimal_close(gold_revenue, valid_revenue, 0.05),
+            passed=_decimal_close(gold_revenue, inner_rev, 0.05),
             gold_value=str(gold_revenue),
-            expected_value=str(valid_revenue),
-            detail="Gold product revenue sum vs valid order revenue (inner join may differ if orphan products)",
+            expected_value=str(inner_rev),
+            detail=(
+                "Gold product revenue sum vs valid orders joined to valid products "
+                "(excludes orders for invalid products)"
+            ),
         )
     )
 
-    # Inner join product dimension: gold revenue <= valid order revenue.
-    inner_rev = (
-        valid_orders(silver_orders)
-        .join(
-            valid_products(silver_products).select("product_id"),
-            on="product_id",
-            how="inner",
-        )
-        .agg(F.sum("total_amount"))
-        .collect()[0][0]
-    )
+    # Inner join product dimension: gold revenue equals valid-order/valid-product join.
     results.append(
         ReconciliationResult(
             check_name="gold_sales_revenue_equals_valid_product_join",

@@ -5,7 +5,11 @@ from __future__ import annotations
 import pytest
 from pyspark.sql import functions as F
 
-from silver.constants import EXPECTED_DEFECT_COUNTS
+from silver.constants import (
+    EXPECTED_DEFECT_COUNTS,
+    TARGET_SILVER_INVALID_ROWS,
+    TARGET_SILVER_INVALID_TOLERANCE,
+)
 from helpers.dimension_test_utils import issue_count
 
 pytestmark = [pytest.mark.integration, pytest.mark.spark]
@@ -46,6 +50,18 @@ def test_mandatory_defects_detected_end_to_end(silver_tables) -> None:
             assert issue_count(orders, issue_code) == expected
         elif issue_code.startswith("referential:"):
             assert issue_count(orders, issue_code) == expected
+
+
+def test_silver_total_invalid_rows_near_assignment_target(silver_tables) -> None:
+    total_invalid = sum(
+        silver_tables[entity].filter(~F.col("_is_valid")).count()
+        for entity in ("customers", "products", "orders")
+    )
+    lower = TARGET_SILVER_INVALID_ROWS - TARGET_SILVER_INVALID_TOLERANCE
+    upper = TARGET_SILVER_INVALID_ROWS + TARGET_SILVER_INVALID_TOLERANCE
+    assert lower <= total_invalid <= upper, (
+        f"expected ~{TARGET_SILVER_INVALID_ROWS} invalid Silver rows, got {total_invalid}"
+    )
 
 
 def test_gold_product_count_matches_valid_products_with_orders(gold_tables, silver_tables) -> None:

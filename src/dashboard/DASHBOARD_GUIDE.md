@@ -289,6 +289,20 @@ Dashboard queries follow these rules:
 
 ---
 
+## Databricks SQL Dashboard UI verification (AC-07)
+
+Local validation (`validate_dashboard_local.py`) confirms SQL correctness only. Complete these steps in your workspace:
+
+1. Run Gold pipeline so `gold.*` tables exist.
+2. Create a new **SQL Dashboard** (Lakeview) in Databricks SQL.
+3. Add each visualization from the mapping table in this guide using queries from `dashboard_queries.sql`.
+4. Confirm KPI cross-check: `kpi_total_revenue` matches sum of `gold.daily_weekly_trends` where `trend_grain = 'DAILY'`.
+5. Save dashboard URL and screenshot for submission evidence.
+
+See also: `scripts/DATABRICKS_E2E_VALIDATION.md` §5.
+
+---
+
 ## Related documentation
 
 - `src/gold/GOLD_ARCHITECTURE.md` — Gold table definitions and segmentation rules

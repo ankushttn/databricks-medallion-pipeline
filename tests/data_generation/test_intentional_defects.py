@@ -9,7 +9,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src" / "data_generation"))
 
-from validate_sample_data import EXPECTED_DEFECTS, run_validation  # noqa: E402
+from validate_sample_data import EXPECTED_DEFECTS, EXPECTED_SUPPLEMENTARY_DEFECTS, run_validation  # noqa: E402
 
 pytestmark = [pytest.mark.data_generation, pytest.mark.integration]
 
@@ -44,3 +44,4 @@ def test_expected_defect_spec_matches_assignment() -> None:
     assert EXPECTED_DEFECTS["orphan_customer_id"] == 50
     assert EXPECTED_DEFECTS["orphan_product_id"] == 30
     assert EXPECTED_DEFECTS["duplicate_order_id_extra_rows"] == 20
+    assert EXPECTED_SUPPLEMENTARY_DEFECTS["price_below_cost"] == 210

@@ -1,6 +1,6 @@
 {
   "run_id": "dashboard-validation-001",
-  "validated_at": "2026-08-16T03:22:15.270911+00:00",
+  "validated_at": "2026-08-16T06:21:04.947547+00:00",
   "results": [
     {
       "query_name": "chart_customer_revenue_distribution",

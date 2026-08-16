@@ -1,6 +1,6 @@
 # Sample Data Validation Report
 
-**Data directory:** `d:\databricks-medallion-pipeline\databricks-medallion-pipeline\data`
+**Data directory:** `data`
 **Validation seed (generation):** `42`
 **Overall status:** ✅ PASSED
 **Checks run:** 34
@@ -53,7 +53,7 @@
 | IV-ALL | invalid_values | No invalid domain values in clean rows | PASS | 0 errors | 0 |
 | DR-ALL | date_ranges | All dates within expected ranges and logically consistent | PASS | 0 errors | 0 |
 | FC-ORD | financial | order total_amount = quantity × unit_price | PASS | 0 mismatches | 0 |
-| FC-PROD | financial | product cost <= price | PASS | 0 violations | 0 |
+| FC-PROD | financial | product cost <= price (except intentional supplementary defects) | PASS | 210 | 210 |
 | II-EMAIL | intentional_issues | Intentional defect: null_email | PASS | 50 | 50 |
 | II-OCID | intentional_issues | Intentional defect: null_customer_id | PASS | 100 | 100 |
 | II-OPID | intentional_issues | Intentional defect: null_product_id | PASS | 200 | 200 |

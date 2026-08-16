@@ -51,6 +51,10 @@ EXPECTED_DEFECTS = {
     "duplicate_order_id_extra_rows": 20,
 }
 
+EXPECTED_SUPPLEMENTARY_DEFECTS = {
+    "price_below_cost": 210,
+}
+
 INVALID_CUSTOMER_ID_RANGE = range(800_001, 800_051)
 INVALID_PRODUCT_ID_RANGE = range(700_001, 700_031)
 
@@ -595,9 +599,9 @@ def validate_financial_calculations(
     report.add(
         "FC-PROD",
         "financial",
-        "product cost <= price",
-        len(product_errors) == 0,
-        "0 violations",
+        "product cost <= price (except intentional supplementary defects)",
+        len(product_errors) == EXPECTED_SUPPLEMENTARY_DEFECTS["price_below_cost"],
+        str(EXPECTED_SUPPLEMENTARY_DEFECTS["price_below_cost"]),
         str(len(product_errors)),
         "; ".join(product_errors[:5]),
     )
