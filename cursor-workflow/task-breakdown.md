@@ -68,14 +68,16 @@
 
 **Design reference:** `design-notes.md` §5, `data-model.md` §6
 
-- [ ] Implement `01_sales_by_product.sql` → `gold.sales_by_product`
-- [ ] Implement `02_revenue_by_customer.sql` → `gold.revenue_by_customer`
-- [ ] Implement `03_daily_weekly_trends.sql` → `gold.daily_weekly_trends`
-- [ ] Implement `04_customer_segmentation.sql` → `gold.customer_segmentation`
-- [ ] Implement `create_gold_tables.py` orchestrator
-- [ ] Filter Silver inputs to `_is_valid = true`
+- [x] Implement `01_sales_by_product.sql` → `gold.sales_by_product`
+- [x] Implement `02_revenue_by_customer.sql` → `gold.revenue_by_customer`
+- [x] Implement `03_daily_weekly_trends.sql` → `gold.daily_weekly_trends`
+- [x] Implement `04_customer_segmentation.sql` → `gold.customer_segmentation`
+- [x] Implement `create_gold_tables.py` orchestrator
+- [x] Filter Silver inputs to `_is_valid = true`
+- [x] Add `src/gold/validate_gold_local.py` and `tests/test_gold_aggregations.py`
+- [x] Document assumptions in `src/gold/GOLD_ARCHITECTURE.md`
 - [ ] Update `database/schema.sql` with Gold DDL
-- [ ] Add `tests/test_gold_aggregations.py`
+- [x] Add `tests/test_gold_aggregations.py`
 
 ## Phase 5 — Dashboard & Wrap-up
 

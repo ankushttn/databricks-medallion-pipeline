@@ -34,3 +34,21 @@ Log issues encountered during development and their resolutions.
 **Fix:** Executed `validate_silver_local.py` against `data/*.csv`. All seven mandatory defect categories matched expected counts. Type and business-rule checks passed with zero failures on clean generated data (products) and no spurious order/customer failures.  
 **Files affected:** `data/SILVER_QUALITY_REPORT.md`, `data/SILVER_QUALITY_REPORT.json`, `src/silver/validate_silver_local.py`  
 **Prevention:** Re-run `python src/silver/validate_silver_local.py` after any change to checks or sample data.
+
+### [2026-08-16] — Gold segmentation: Inactive segment empty on sample data
+
+**Layer:** Gold  
+**Symptom:** `gold.customer_segmentation` has 3 rows (High-Value, Repeat, One-Time) — no Inactive.  
+**Root cause:** All 9,940 valid customers have at least one valid order. Invalid customers (70) are excluded from Gold.  
+**Fix:** No code change. Validation updated from "must have 4 segments" to "at most 4 allowed segment types."  
+**Files affected:** `src/gold/validations.py`, `src/gold/GOLD_ARCHITECTURE.md`  
+**Prevention:** Empty behavioral segments are valid; do not require zero-count segment rows.
+
+### [2026-08-16] — Gold revenue_by_customer order count vs trends
+
+**Layer:** Gold  
+**Symptom:** `SUM(total_orders)` in `revenue_by_customer` (99,003) < valid orders (99,600).  
+**Root cause:** 597 valid orders reference customers that failed Silver validation (duplicate PK, etc.). These orders appear in product/trend Gold tables but not customer attribution.  
+**Fix:** By design — customer Gold requires valid customer dimension. Documented in `GOLD_ARCHITECTURE.md`.  
+**Files affected:** `src/gold/GOLD_ARCHITECTURE.md`, `data/GOLD_VALIDATION_REPORT.md`  
+**Prevention:** Expected when invalid customers have valid-looking order rows.
