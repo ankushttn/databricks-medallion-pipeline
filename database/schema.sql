@@ -165,9 +165,8 @@ CREATE TABLE IF NOT EXISTS gold.daily_weekly_trends (
 CREATE TABLE IF NOT EXISTS gold.customer_segmentation (
     segment_type STRING,
     customer_count BIGINT,
+    avg_revenue DECIMAL(12, 2),
     total_revenue DECIMAL(14, 2),
-    total_orders BIGINT,
-    avg_revenue_per_customer DECIMAL(14, 2),
     _refreshed_at TIMESTAMP
 ) USING DELTA;
 

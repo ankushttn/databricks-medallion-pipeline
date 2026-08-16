@@ -9,6 +9,7 @@ from common.pipeline_utils import (
     ConfigurationError,
     validate_local_source_directory,
     validate_schema_name,
+    validate_sql_identifier,
     validate_write_mode,
 )
 from gold.config import GoldConfig, validate_gold_config
@@ -29,6 +30,15 @@ def test_validate_write_mode_rejects_invalid() -> None:
 def test_validate_schema_name_rejects_empty() -> None:
     with pytest.raises(ConfigurationError, match="bronze_schema"):
         validate_schema_name("  ", field="bronze_schema")
+
+
+def test_validate_sql_identifier_rejects_invalid_characters() -> None:
+    with pytest.raises(ConfigurationError, match="catalog"):
+        validate_sql_identifier("main-prod", field="catalog")
+
+
+def test_validate_sql_identifier_accepts_underscore_prefix() -> None:
+    assert validate_sql_identifier("_staging", field="schema") == "_staging"
 
 
 def test_validate_local_source_directory_missing(tmp_path) -> None:

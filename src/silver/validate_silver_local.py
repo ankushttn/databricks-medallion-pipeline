@@ -21,11 +21,8 @@ if str(_SRC_DIR) not in sys.path:
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql import functions as F
 
-from bronze.schemas import (
-    CUSTOMERS_BRONZE_SCHEMA,
-    ORDERS_BRONZE_SCHEMA,
-    PRODUCTS_BRONZE_SCHEMA,
-)
+from bronze.config import CUSTOMERS_SPEC, ORDERS_SPEC, PRODUCTS_SPEC
+from bronze.ingest_utils import add_ingestion_metadata, read_bronze_csv as read_bronze_entity_csv
 from silver.constants import EXPECTED_DEFECT_COUNTS, EXPECTED_SUPPLEMENTARY_DEFECT_COUNTS
 from silver.metrics import build_check_summary, build_entity_metrics
 from silver.quality_engine import apply_all_dimensions, setup_logging
@@ -95,24 +92,19 @@ def get_spark_session() -> SparkSession:
     )
 
 
+_ENTITY_SPECS = {
+    "customers": CUSTOMERS_SPEC,
+    "products": PRODUCTS_SPEC,
+    "orders": ORDERS_SPEC,
+}
+
+
 def read_bronze_csv(spark: SparkSession, data_dir: Path, entity: str) -> DataFrame:
     """Read a CSV file with Bronze schema and synthetic ingest metadata."""
-    schemas = {
-        "customers": CUSTOMERS_BRONZE_SCHEMA,
-        "products": PRODUCTS_BRONZE_SCHEMA,
-        "orders": ORDERS_BRONZE_SCHEMA,
-    }
+    spec = _ENTITY_SPECS[entity]
     path = str(data_dir / f"{entity}.csv")
-    df = (
-        spark.read.schema(schemas[entity])
-        .option("header", True)
-        .option("nullValue", "")
-        .csv(path)
-    )
-    ingested_at = datetime.now(timezone.utc).replace(tzinfo=None)
-    return df.withColumn("_ingested_at", F.lit(ingested_at)).withColumn(
-        "_source_file", F.lit(path)
-    )
+    df = read_bronze_entity_csv(spark, path, spec)
+    return add_ingestion_metadata(df, path)
 
 
 def issue_count(df: DataFrame, issue_code: str) -> int:
