@@ -154,10 +154,13 @@ def _parse_decimal(value: str) -> Decimal | None:
 
 def load_csv(path: Path) -> tuple[list[str], list[dict[str, str]]]:
     """Load CSV and return (fieldnames, rows)."""
-    with path.open(encoding="utf-8", newline="") as handle:
-        reader = csv.DictReader(handle)
-        fieldnames = list(reader.fieldnames or [])
-        rows = list(reader)
+    try:
+        with path.open(encoding="utf-8", newline="") as handle:
+            reader = csv.DictReader(handle)
+            fieldnames = list(reader.fieldnames or [])
+            rows = list(reader)
+    except (OSError, UnicodeDecodeError, csv.Error) as exc:
+        raise ValueError(f"Failed to read CSV {path}: {exc}") from exc
     return fieldnames, rows
 
 

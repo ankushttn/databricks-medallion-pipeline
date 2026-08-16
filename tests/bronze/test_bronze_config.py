@@ -4,9 +4,22 @@ from __future__ import annotations
 
 import pytest
 
-from bronze.config import CUSTOMERS_SPEC, ORDERS_SPEC, build_source_path, load_bronze_config
-from bronze.ingest_utils import BronzeSourceFileError, count_csv_data_rows, validate_csv_header, verify_source_file_exists
+from bronze.config import (
+    CUSTOMERS_SPEC,
+    ORDERS_SPEC,
+    build_source_path,
+    load_and_validate_bronze_config,
+    load_bronze_config,
+)
+from bronze.ingest_utils import (
+    BronzeIngestionError,
+    BronzeSourceFileError,
+    count_csv_data_rows,
+    validate_csv_header,
+    verify_source_file_exists,
+)
 from bronze.schemas import CUSTOMERS_CSV_COLUMNS, EXPECTED_ROW_COUNTS, ORDERS_CSV_COLUMNS, PRODUCTS_CSV_COLUMNS
+from common.pipeline_utils import ConfigurationError
 
 pytestmark = pytest.mark.bronze
 
@@ -87,3 +100,23 @@ def test_orders_spec_partitioned_by_order_date() -> None:
 def test_bronze_schema_field_count() -> None:
     assert len(CUSTOMERS_SPEC.schema.fields) == 7
     assert len(CUSTOMERS_CSV_COLUMNS) == 7
+
+
+def test_load_and_validate_rejects_missing_source_dir(tmp_path) -> None:
+    missing = tmp_path / "missing_data"
+    with pytest.raises(ConfigurationError, match="Source directory not found"):
+        load_and_validate_bronze_config(source_base_path=str(missing))
+
+
+def test_validate_csv_header_raises_on_mismatch(tmp_path) -> None:
+    bad_csv = tmp_path / "bad.csv"
+    bad_csv.write_text("wrong,col\n1,x\n", encoding="utf-8")
+    with pytest.raises(BronzeIngestionError, match="header mismatch"):
+        validate_csv_header(str(bad_csv), CUSTOMERS_CSV_COLUMNS)
+
+
+def test_validate_csv_header_raises_on_empty_file(tmp_path) -> None:
+    empty = tmp_path / "empty.csv"
+    empty.write_text("", encoding="utf-8")
+    with pytest.raises(BronzeSourceFileError, match="empty"):
+        validate_csv_header(str(empty), CUSTOMERS_CSV_COLUMNS)

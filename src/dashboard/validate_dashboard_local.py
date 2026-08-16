@@ -16,6 +16,8 @@ if str(_SRC_DIR) not in sys.path:
     sys.path.insert(0, str(_SRC_DIR))
 
 from pyspark.sql import SparkSession
+from pyspark.sql.utils import AnalysisException
+from py4j.protocol import Py4JJavaError
 
 from dashboard.query_loader import load_dashboard_queries, localize_sql
 from gold.config import GoldConfig
@@ -91,9 +93,14 @@ def validate_query(spark: SparkSession, query_name: str, sql: str) -> QueryValid
             detail = f"kpi_expected_single_row got={row_count}"
 
         return QueryValidationResult(query_name, passed, row_count, detail)
-    except Exception as exc:
-        logger.error("Dashboard query failed name=%s", query_name, exc_info=True)
-        return QueryValidationResult(query_name, False, 0, f"error={exc}")
+    except (AnalysisException, Py4JJavaError) as exc:
+        logger.error(
+            "Dashboard query failed name=%s sql_error=%s",
+            query_name,
+            exc,
+            exc_info=True,
+        )
+        return QueryValidationResult(query_name, False, 0, f"sql_error={exc}")
 
 
 def collect_kpi_snapshot(spark: SparkSession, queries: dict[str, str]) -> dict[str, float | int]:

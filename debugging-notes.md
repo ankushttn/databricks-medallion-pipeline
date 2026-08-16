@@ -79,3 +79,12 @@ Log issues encountered during development and their resolutions.
 **Fix:** Implemented independent reconciliation (`src/gold/reconciliation.py`, `reconcile_gold_local.py`, `tests/test_gold_reconciliation.py`). Alternate methods: deduplicated order facts, semi-joins, Python `classify_segment()`. All 11 reconciliation checks PASS. Five product traces (83, 121, 197, 236, 469) and five customer traces (1, 10, 866, 1966, 264) PASS Bronze → Silver → Gold. Pytest: 17/17 passed (`test_gold_reconciliation.py` + `test_gold_aggregations.py`).  
 **Files affected:** `data/GOLD_RECONCILIATION_REPORT.md`, `data/GOLD_RECONCILIATION_REPORT.json`, `src/gold/reconciliation.py`, `src/gold/reconcile_gold_local.py`, `tests/test_gold_reconciliation.py`  
 **Prevention:** Re-run `python src/gold/reconcile_gold_local.py` after any Gold SQL or Silver validity rule change.
+
+### [2026-08-16] — Production-readiness: logging, exceptions, config validation
+
+**Layer:** Infrastructure (Bronze, Silver, Gold, common)  
+**Symptom:** N/A — production-readiness review requested.  
+**Root cause:** Gaps in config fail-fast validation, inconsistent pipeline start/end logging, broad `except Exception` handlers, silent CSV header skip when file missing.  
+**Fix:** Added `src/common/pipeline_utils.py` (logging, timing, config validation), `ERROR_HANDLING.md`. Narrowed exception handlers in Bronze ingest, data generation, dashboard validation. Added empty-dataset warnings, elapsed-time logging, Gold validation SQL error logging with `exc_info`. Config loaders now validate write_mode and schema names; Bronze validates local source directory.  
+**Files affected:** `src/common/pipeline_utils.py`, `src/bronze/config.py`, `src/bronze/ingest_utils.py`, `src/silver/config.py`, `src/silver/quality_engine.py`, `src/silver/create_silver_tables.py`, `src/gold/config.py`, `src/gold/gold_engine.py`, `src/gold/create_gold_tables.py`, `src/data_generation/generate_sample_data.py`, `src/data_generation/validate_sample_data.py`, `src/dashboard/validate_dashboard_local.py`, `tests/common/test_pipeline_utils.py`, `tests/bronze/test_bronze_config.py`, `ERROR_HANDLING.md`  
+**Prevention:** Follow `ERROR_HANDLING.md`; run `python -m pytest tests/ -v` after pipeline changes (120 tests).

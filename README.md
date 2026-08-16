@@ -54,6 +54,8 @@ python -m pytest tests/data_generation/ tests/bronze/ tests/silver/ tests/gold/ 
 
 See `tests/README.md` for structure, markers, and latest results (`tests/TEST_RESULTS.md`).
 
+Error handling: see `ERROR_HANDLING.md`.
+
 ## Prerequisites
 
 - Databricks workspace with Unity Catalog (or Hive metastore)

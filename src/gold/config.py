@@ -6,6 +6,7 @@ import os
 from dataclasses import dataclass
 
 from gold.constants import HIGH_VALUE_REVENUE_THRESHOLD
+from common.pipeline_utils import validate_schema_name, validate_write_mode
 
 ENV_CATALOG = "MEDALLION_CATALOG"
 ENV_SILVER_SCHEMA = "MEDALLION_SILVER_SCHEMA"
@@ -76,6 +77,31 @@ def load_gold_config(
     )
 
 
+def validate_gold_config(config: GoldConfig) -> None:
+    """Validate Gold configuration before pipeline execution."""
+    validate_write_mode(config.write_mode, layer="Gold")
+    validate_schema_name(config.silver_schema, field="silver_schema")
+    validate_schema_name(config.gold_schema, field="gold_schema")
+
+
+def load_and_validate_gold_config(
+    *,
+    catalog: str | None = None,
+    silver_schema: str | None = None,
+    gold_schema: str | None = None,
+    write_mode: str | None = None,
+) -> GoldConfig:
+    """Load and validate Gold configuration."""
+    config = load_gold_config(
+        catalog=catalog,
+        silver_schema=silver_schema,
+        gold_schema=gold_schema,
+        write_mode=write_mode,
+    )
+    validate_gold_config(config)
+    return config
+
+
 def add_gold_config_args(parser) -> None:
     """Register Gold configuration arguments on an argparse parser."""
     parser.add_argument("--catalog", default=None, help=f"Unity Catalog. Env: {ENV_CATALOG}")
@@ -99,7 +125,7 @@ def add_gold_config_args(parser) -> None:
 
 def config_from_args(args) -> GoldConfig:
     """Build GoldConfig from parsed argparse namespace."""
-    return load_gold_config(
+    return load_and_validate_gold_config(
         catalog=args.catalog,
         silver_schema=args.silver_schema,
         gold_schema=args.gold_schema,

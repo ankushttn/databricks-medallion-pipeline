@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import sys
+import time
 from pathlib import Path
 
 from pyspark.sql import SparkSession
@@ -12,6 +13,7 @@ from pyspark.sql.utils import AnalysisException
 from gold.config import GoldConfig
 from gold.constants import GOLD_TABLE_SCRIPTS, SEGMENT_TYPES
 from gold.validations import VALIDATIONS, ValidationResult
+from common.pipeline_utils import log_table_created, log_validation_result
 
 logger = logging.getLogger(__name__)
 
@@ -85,17 +87,21 @@ def execute_gold_script(spark: SparkSession, config: GoldConfig, script_name: st
 def run_gold_pipeline(config: GoldConfig, spark: SparkSession | None = None) -> SparkSession:
     """Build all Gold tables from Silver inputs."""
     active_spark = spark or get_spark_session("gold_create_tables")
+    pipeline_start = time.perf_counter()
+    logger.info("Gold pipeline START local_mode=%s", config.local_mode)
     if not config.local_mode:
         ensure_gold_schema_exists(active_spark, config)
 
     for script_name, table_name in GOLD_TABLE_SCRIPTS:
         execute_gold_script(active_spark, config, script_name)
         row_count = active_spark.table(config.gold_table(table_name)).count()
-        logger.info(
-            "Gold table %s row_count=%d",
-            config.gold_table(table_name),
-            row_count,
-        )
+        log_table_created(config.gold_table(table_name), row_count)
+
+    logger.info(
+        "Gold pipeline build complete tables=%d elapsed_s=%.2f",
+        len(GOLD_TABLE_SCRIPTS),
+        time.perf_counter() - pipeline_start,
+    )
     return active_spark
 
 
@@ -113,6 +119,12 @@ def run_gold_validations(spark: SparkSession, config: GoldConfig) -> list[Valida
         except AnalysisException as exc:
             passed = False
             detail = str(exc)
+            logger.error(
+                "Gold validation query failed table=%s check=%s",
+                validation.table_name,
+                validation.name,
+                exc_info=True,
+            )
 
         result = ValidationResult(
             table_name=validation.table_name,
@@ -122,8 +134,12 @@ def run_gold_validations(spark: SparkSession, config: GoldConfig) -> list[Valida
             detail=detail,
         )
         results.append(result)
-        level = logging.INFO if passed else logging.ERROR
-        logger.log(level, "Gold validation %s.%s -> %s (%s)", validation.table_name, validation.name, "PASS" if passed else "FAIL", detail)
+        log_validation_result(
+            layer="gold",
+            check_name=f"{validation.table_name}.{validation.name}",
+            passed=passed,
+            detail=detail,
+        )
 
     return results
 
