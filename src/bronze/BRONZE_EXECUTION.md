@@ -119,7 +119,7 @@ SELECT COUNT(*) FROM main.bronze.orders WHERE customer_id IS NULL;  -- expected:
 
 ## Local Development Notes
 
-- **Static tests** run without Spark: `pytest tests/test_bronze_ingest.py -v`
+- **Automated tests** run without Delta: `python -m pytest tests/bronze/ -v`
 - **Full Delta write** requires `delta-spark` locally or a Databricks cluster
 - Default local path: `--source-base-path data` (project-relative)
 
