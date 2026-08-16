@@ -6,7 +6,7 @@ import os
 from dataclasses import dataclass
 
 from gold.constants import HIGH_VALUE_REVENUE_THRESHOLD
-from common.pipeline_utils import validate_schema_name, validate_write_mode
+from common.pipeline_utils import validate_schema_name, validate_sql_identifier, validate_write_mode
 
 ENV_CATALOG = "MEDALLION_CATALOG"
 ENV_SILVER_SCHEMA = "MEDALLION_SILVER_SCHEMA"
@@ -82,6 +82,8 @@ def validate_gold_config(config: GoldConfig) -> None:
     validate_write_mode(config.write_mode, layer="Gold")
     validate_schema_name(config.silver_schema, field="silver_schema")
     validate_schema_name(config.gold_schema, field="gold_schema")
+    if config.catalog:
+        validate_sql_identifier(config.catalog, field="catalog")
 
 
 def load_and_validate_gold_config(

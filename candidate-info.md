@@ -3,7 +3,7 @@
 | Field | Value |
 |-------|-------|
 | **Name** | Ankush Dev |
-| **Email** | _[Add your submission email]_ |
+| **Email** | ankush.dev@tothenew.com |
 | **Submission Date** | 2026-08-16 |
 | **Databricks Workspace** | _[Add workspace URL after running `scripts/DATABRICKS_E2E_VALIDATION.md`]_ |
 | **Git Repository** | https://github.com/ankushttn/databricks-medallion-pipeline.git |

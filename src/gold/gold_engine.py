@@ -13,7 +13,7 @@ from pyspark.sql.utils import AnalysisException
 from gold.config import GoldConfig
 from gold.constants import GOLD_TABLE_SCRIPTS, SEGMENT_TYPES
 from gold.validations import VALIDATIONS, ValidationResult
-from common.pipeline_utils import log_table_created, log_validation_result
+from common.pipeline_utils import log_table_created, log_validation_result, setup_logging as configure_pipeline_logging
 
 logger = logging.getLogger(__name__)
 
@@ -31,11 +31,7 @@ def configure_src_path() -> None:
 
 
 def setup_logging(level: int = logging.INFO) -> None:
-    logging.basicConfig(
-        level=level,
-        format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
+    configure_pipeline_logging(level)
 
 
 def get_spark_session(app_name: str) -> SparkSession:

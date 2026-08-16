@@ -18,6 +18,7 @@ from bronze.schemas import (
 from common.pipeline_utils import (
     validate_local_source_directory,
     validate_schema_name,
+    validate_sql_identifier,
     validate_write_mode,
 )
 
@@ -98,6 +99,8 @@ def validate_bronze_config(config: BronzeConfig) -> None:
     """Validate Bronze configuration before pipeline execution."""
     validate_write_mode(config.write_mode, layer="Bronze")
     validate_schema_name(config.bronze_schema, field="bronze_schema")
+    if config.catalog:
+        validate_sql_identifier(config.catalog, field="catalog")
     validate_local_source_directory(config.source_base_path)
 
 

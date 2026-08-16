@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import re
 import time
 from contextlib import contextmanager
 from dataclasses import dataclass
@@ -12,6 +13,7 @@ from typing import Iterator
 logger = logging.getLogger(__name__)
 
 ALLOWED_WRITE_MODES = frozenset({"overwrite", "append"})
+SQL_IDENTIFIER_PATTERN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
 
 class ConfigurationError(ValueError):
@@ -28,6 +30,17 @@ def setup_logging(level: int = logging.INFO) -> None:
     )
 
 
+def validate_sql_identifier(name: str, *, field: str) -> str:
+    """Validate a Unity Catalog / Hive identifier used in SQL DDL."""
+    identifier = name.strip()
+    if not identifier or not SQL_IDENTIFIER_PATTERN.match(identifier):
+        raise ConfigurationError(
+            f"{field} must be a valid SQL identifier (letters, digits, underscore; "
+            f"cannot start with a digit), got {name!r}"
+        )
+    return identifier
+
+
 def validate_write_mode(write_mode: str, *, layer: str) -> str:
     """Validate Delta write mode."""
     normalized = write_mode.strip().lower()
@@ -40,10 +53,7 @@ def validate_write_mode(write_mode: str, *, layer: str) -> str:
 
 def validate_schema_name(schema: str, *, field: str) -> str:
     """Validate a non-empty schema name."""
-    name = schema.strip()
-    if not name:
-        raise ConfigurationError(f"{field} must be a non-empty string")
-    return name
+    return validate_sql_identifier(schema, field=field)
 
 
 def validate_local_source_directory(source_base_path: str) -> None:

@@ -7,6 +7,7 @@ from dataclasses import dataclass
 
 from common.pipeline_utils import (
     validate_schema_name,
+    validate_sql_identifier,
     validate_write_mode,
 )
 
@@ -70,6 +71,8 @@ def validate_silver_config(config: SilverConfig) -> None:
     validate_write_mode(config.write_mode, layer="Silver")
     validate_schema_name(config.bronze_schema, field="bronze_schema")
     validate_schema_name(config.silver_schema, field="silver_schema")
+    if config.catalog:
+        validate_sql_identifier(config.catalog, field="catalog")
 
 
 def load_and_validate_silver_config(
