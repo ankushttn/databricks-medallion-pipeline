@@ -5,6 +5,11 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 
+from common.pipeline_utils import (
+    validate_schema_name,
+    validate_write_mode,
+)
+
 ENV_CATALOG = "MEDALLION_CATALOG"
 ENV_BRONZE_SCHEMA = "MEDALLION_BRONZE_SCHEMA"
 ENV_SILVER_SCHEMA = "MEDALLION_SILVER_SCHEMA"
@@ -60,6 +65,33 @@ def load_silver_config(
     )
 
 
+def validate_silver_config(config: SilverConfig) -> None:
+    """Validate Silver configuration before pipeline execution."""
+    validate_write_mode(config.write_mode, layer="Silver")
+    validate_schema_name(config.bronze_schema, field="bronze_schema")
+    validate_schema_name(config.silver_schema, field="silver_schema")
+
+
+def load_and_validate_silver_config(
+    *,
+    catalog: str | None = None,
+    bronze_schema: str | None = None,
+    silver_schema: str | None = None,
+    write_mode: str | None = None,
+    run_id: str | None = None,
+) -> SilverConfig:
+    """Load and validate Silver configuration."""
+    config = load_silver_config(
+        catalog=catalog,
+        bronze_schema=bronze_schema,
+        silver_schema=silver_schema,
+        write_mode=write_mode,
+        run_id=run_id,
+    )
+    validate_silver_config(config)
+    return config
+
+
 def add_silver_config_args(parser) -> None:
     """Register Silver configuration arguments on an argparse parser."""
     parser.add_argument("--catalog", default=None, help=f"Unity Catalog. Env: {ENV_CATALOG}")
@@ -88,7 +120,7 @@ def add_silver_config_args(parser) -> None:
 
 def config_from_args(args) -> SilverConfig:
     """Build SilverConfig from parsed argparse namespace."""
-    return load_silver_config(
+    return load_and_validate_silver_config(
         catalog=args.catalog,
         bronze_schema=args.bronze_schema,
         silver_schema=args.silver_schema,

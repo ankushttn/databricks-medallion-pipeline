@@ -16,6 +16,7 @@ import logging
 import sys
 
 from silver.config import add_silver_config_args, config_from_args
+from common.pipeline_utils import ConfigurationError
 from silver.quality_engine import (
     SilverValidationError,
     configure_src_path,
@@ -44,8 +45,11 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         return run_silver_pipeline(config)
+    except ConfigurationError as exc:
+        logger.error("Silver configuration invalid: %s", exc)
+        return 1
     except SilverValidationError as exc:
-        logger.error("Silver validation failed: %s", exc)
+        logger.error("Silver validation failed: %s", exc, exc_info=True)
         return 1
 
 

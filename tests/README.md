@@ -13,7 +13,8 @@ tests/
 ├── silver/                     # Quality dimensions (completeness → business rules)
 ├── gold/                       # Aggregations, reconciliation, segmentation
 ├── dashboard/                  # Dashboard SQL queries
-└── integration/                # End-to-end pipeline tests
+├── integration/                # End-to-end pipeline tests
+└── common/                     # Config validation and pipeline utilities
 ```
 
 ## Test categories
@@ -73,6 +74,10 @@ Tests use:
 1. **Committed `data/*.csv`** — generated with seed 42 for integration tests.
 2. **In-memory synthetic rows** — for isolated dimension positive/negative cases.
 3. **In-memory generation** — `GenerationConfig(seed=N)` for generation unit tests.
+
+## Error handling
+
+See `ERROR_HANDLING.md` at the repository root for logging standards, exception taxonomy, and input-validation behavior.
 
 ## Related validation scripts
 

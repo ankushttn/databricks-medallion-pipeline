@@ -5,16 +5,23 @@ from __future__ import annotations
 import csv
 import logging
 import sys
+import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Sequence
 
+from py4j.protocol import Py4JJavaError
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.functions import current_timestamp, lit
 from pyspark.sql.utils import AnalysisException
 
 from bronze.config import BronzeConfig, EntityIngestSpec
+from common.pipeline_utils import (
+    PipelineRunContext,
+    log_table_created,
+    setup_logging as configure_pipeline_logging,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -43,11 +50,7 @@ class IngestResult:
 
 def setup_logging(level: int = logging.INFO) -> None:
     """Configure structured logging for Bronze scripts."""
-    logging.basicConfig(
-        level=level,
-        format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
+    configure_pipeline_logging(level)
 
 
 def configure_src_path() -> None:
@@ -114,7 +117,9 @@ def validate_csv_header(source_path: str, expected_columns: Sequence[str]) -> No
     """Validate CSV header columns match the expected Bronze business schema."""
     local_path = _local_path_for_check(source_path)
     if local_path is None or not local_path.is_file():
-        return
+        raise BronzeSourceFileError(
+            f"Cannot validate CSV header; source not found locally: {source_path}"
+        )
 
     with local_path.open(encoding="utf-8", newline="") as handle:
         reader = csv.reader(handle)
@@ -148,6 +153,11 @@ def read_bronze_csv(spark: SparkSession, source_path: str, spec: EntityIngestSpe
         logger.error("Failed to read CSV: %s", source_path, exc_info=True)
         raise BronzeIngestionError(
             f"Malformed input or read failure for {source_path}: {exc}"
+        ) from exc
+    except Py4JJavaError as exc:
+        logger.error("Spark worker failed reading CSV: %s", source_path, exc_info=True)
+        raise BronzeIngestionError(
+            f"Malformed CSV or schema mismatch for {source_path}: {exc}"
         ) from exc
 
 
@@ -197,6 +207,7 @@ def ingest_entity(
     source_path = config.source_path(spec.source_filename)
     target_table = config.qualified_table_name(spec.table_name)
     started_at = datetime.now(timezone.utc)
+    timer_start = time.perf_counter()
 
     logger.info(
         "Starting Bronze ingestion entity=%s source=%s target=%s",
@@ -209,9 +220,26 @@ def ingest_entity(
         verify_source_file_exists(source_path)
         validate_csv_header(source_path, [field.name for field in spec.schema.fields])
         expected_csv_rows = count_csv_data_rows(source_path)
+        if expected_csv_rows == 0:
+            logger.warning(
+                "Bronze source has zero data rows: entity=%s source=%s",
+                spec.entity_name,
+                source_path,
+            )
 
         df = read_bronze_csv(spark, source_path, spec)
-        rows_read = df.count()
+        try:
+            rows_read = df.count()
+        except (AnalysisException, Py4JJavaError) as exc:
+            logger.error(
+                "Failed counting rows after CSV read: entity=%s source=%s",
+                spec.entity_name,
+                source_path,
+                exc_info=True,
+            )
+            raise BronzeIngestionError(
+                f"Malformed CSV or type coercion failure for {source_path}: {exc}"
+            ) from exc
 
         if expected_csv_rows >= 0 and rows_read != expected_csv_rows:
             raise BronzeIngestionError(
@@ -229,6 +257,8 @@ def ingest_entity(
         )
 
         rows_written = rows_read
+        elapsed = time.perf_counter() - timer_start
+        log_table_created(target_table, rows_written)
         result = IngestResult(
             entity_name=spec.entity_name,
             source_path=source_path,
@@ -239,36 +269,41 @@ def ingest_entity(
             ingested_at=started_at,
         )
         logger.info(
-            "Bronze ingestion SUCCESS entity=%s source=%s target=%s rows_read=%d rows_written=%d",
+            "Bronze ingestion SUCCESS entity=%s source=%s target=%s rows_read=%d rows_written=%d elapsed_s=%.2f",
             spec.entity_name,
             source_path,
             target_table,
             rows_read,
             rows_written,
+            elapsed,
         )
         return result
 
     except (BronzeSourceFileError, BronzeIngestionError) as exc:
+        elapsed = time.perf_counter() - timer_start
         logger.error(
-            "Bronze ingestion FAILED entity=%s source=%s target=%s error=%s",
+            "Bronze ingestion FAILED entity=%s source=%s target=%s elapsed_s=%.2f error=%s",
             spec.entity_name,
             source_path,
             target_table,
+            elapsed,
             exc,
             exc_info=True,
         )
         raise
-    except Exception as exc:
+    except (AnalysisException, Py4JJavaError, OSError, csv.Error, UnicodeDecodeError) as exc:
+        elapsed = time.perf_counter() - timer_start
         logger.error(
-            "Bronze ingestion FAILED entity=%s source=%s target=%s error=%s",
+            "Bronze ingestion FAILED entity=%s source=%s target=%s elapsed_s=%.2f error=%s",
             spec.entity_name,
             source_path,
             target_table,
+            elapsed,
             exc,
             exc_info=True,
         )
         raise BronzeIngestionError(
-            f"Unexpected failure ingesting {spec.entity_name}: {exc}"
+            f"Unexpected failure ingesting {spec.entity_name} from {source_path}: {exc}"
         ) from exc
 
 
@@ -317,6 +352,9 @@ def run_ingest_all(argv: Sequence[str] | None = None) -> int:
 
     spark = get_spark_session("bronze_ingest_all")
     failures: list[str] = []
+    run_ctx = PipelineRunContext(layer="bronze", run_id=datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ"))
+    batch_start = time.perf_counter()
+    logger.info("Bronze ingest_all START run_id=%s source_base_path=%s", run_ctx.run_id, config.source_base_path)
 
     for spec in ALL_ENTITY_SPECS:
         try:
@@ -324,10 +362,22 @@ def run_ingest_all(argv: Sequence[str] | None = None) -> int:
         except BronzeIngestionError as exc:
             failures.append(f"{spec.entity_name}: {exc}")
 
+    elapsed = time.perf_counter() - batch_start
     if failures:
         for message in failures:
             logger.error("Bronze ingest_all failure: %s", message)
+        logger.error(
+            "Bronze ingest_all END run_id=%s status=FAILED elapsed_s=%.2f failures=%d",
+            run_ctx.run_id,
+            elapsed,
+            len(failures),
+        )
         return 1
 
-    logger.info("Bronze ingest_all completed successfully for all entities")
+    logger.info(
+        "Bronze ingest_all END run_id=%s status=SUCCESS elapsed_s=%.2f entities=%d",
+        run_ctx.run_id,
+        elapsed,
+        len(ALL_ENTITY_SPECS),
+    )
     return 0

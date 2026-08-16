@@ -720,8 +720,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     except DataGenerationValidationError:
         logger.error("Data generation failed validation", exc_info=True)
         return 1
-    except Exception:
-        logger.error("Data generation failed", exc_info=True)
+    except (OSError, ValueError, KeyError, csv.Error) as exc:
+        logger.error("Data generation failed: %s", exc, exc_info=True)
         return 1
 
 

@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib
 import logging
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -13,6 +14,7 @@ from pyspark.sql.utils import AnalysisException
 
 from silver.config import SilverConfig
 from silver.constants import ENTITY_PARTITION_COLUMNS, ENTITY_PRIMARY_KEYS
+from common.pipeline_utils import log_table_created
 from silver.metrics import (
     build_check_summary,
     build_entity_metrics,
@@ -168,6 +170,9 @@ def process_entity(
 
     logger.info("Processing Silver entity=%s bronze=%s silver=%s", entity, bronze_table, silver_table)
     bronze_df = read_bronze_table(spark, bronze_table)
+    bronze_count = bronze_df.count()
+    if bronze_count == 0:
+        logger.warning("Bronze table is empty: entity=%s table=%s", entity, bronze_table)
 
     silver_df, detail_df, checks = apply_all_dimensions(bronze_df, ctx)
     validate_row_count_parity(bronze_df, silver_df, entity)
@@ -178,6 +183,7 @@ def process_entity(
         config.write_mode,
         ENTITY_PARTITION_COLUMNS[entity],
     )
+    log_table_created(silver_table, silver_df.count())
 
     metrics_df = build_entity_metrics(silver_df, entity, ctx.run_id, ctx.validated_at)
     summary_df = build_check_summary(silver_df, entity, checks, ctx.run_id, ctx.validated_at)
@@ -186,12 +192,13 @@ def process_entity(
 
 def run_silver_pipeline(config: SilverConfig) -> int:
     """Execute full Silver validation pipeline."""
+    pipeline_start = time.perf_counter()
     spark = get_spark_session("silver_create_tables")
     ensure_silver_schema_exists(spark, config)
 
     run_id = generate_run_id(config)
     validated_at = datetime.now(timezone.utc)
-    logger.info("Starting Silver pipeline run_id=%s", run_id)
+    logger.info("Silver pipeline START run_id=%s", run_id)
 
     all_details: list[DataFrame] = []
     all_metrics: list[DataFrame] = []
@@ -256,5 +263,9 @@ def run_silver_pipeline(config: SilverConfig) -> int:
             (),
         )
 
-    logger.info("Silver pipeline completed successfully run_id=%s", run_id)
+    logger.info(
+        "Silver pipeline END run_id=%s status=SUCCESS elapsed_s=%.2f",
+        run_id,
+        time.perf_counter() - pipeline_start,
+    )
     return 0

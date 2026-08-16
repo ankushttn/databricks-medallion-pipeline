@@ -1,8 +1,8 @@
 # Test Results
 
-**Run date:** 2026-08-16  
+**Run date:** 2026-08-16 (post production-readiness review)  
 **Command:** `python -m pytest tests/ -v`  
-**Result:** **109 passed** in 516s (~8m 36s)  
+**Result:** **120 passed** in 528s (~8m 48s)  
 **Environment:** Windows, Python 3.10.9, PySpark local[1]
 
 ## Summary by layer
@@ -24,6 +24,7 @@
 | Gold segmentation | 8 | PASS |
 | Dashboard queries | 12 | PASS |
 | Integration (end-to-end) | 5 | PASS |
+| Common (config validation) | 8 | PASS |
 
 ## Business outcomes verified
 

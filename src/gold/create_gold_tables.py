@@ -15,8 +15,10 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
+from datetime import datetime, timezone
 
 from gold.config import add_gold_config_args, config_from_args
+from common.pipeline_utils import ConfigurationError, PipelineRunContext, pipeline_timer
 from gold.gold_engine import (
     GoldBuildError,
     all_validations_passed,
@@ -45,23 +47,24 @@ def main(argv: list[str] | None = None) -> int:
     setup_logging()
     args = parse_args(argv)
     config = config_from_args(args)
+    run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    run_ctx = PipelineRunContext(layer="gold", run_id=run_id)
 
     try:
-        spark = run_gold_pipeline(config)
-    except GoldBuildError as exc:
-        logger.error("Gold build failed: %s", exc)
-        return 1
-
-    if args.skip_validation:
+        with pipeline_timer(run_ctx, catalog=config.catalog, gold_schema=config.gold_schema):
+            spark = run_gold_pipeline(config)
+            if not args.skip_validation:
+                results = run_gold_validations(spark, config)
+                if not all_validations_passed(results):
+                    failing = sum(1 for r in results if not r.passed)
+                    raise GoldBuildError(f"Gold validation failed: {failing} failing checks")
         return 0
-
-    results = run_gold_validations(spark, config)
-    if not all_validations_passed(results):
-        logger.error("Gold validation failed (%d failing checks)", sum(1 for r in results if not r.passed))
+    except ConfigurationError as exc:
+        logger.error("Gold configuration invalid: %s", exc)
         return 1
-
-    logger.info("Gold pipeline completed successfully")
-    return 0
+    except GoldBuildError as exc:
+        logger.error("Gold build failed: %s", exc, exc_info=True)
+        return 1
 
 
 if __name__ == "__main__":

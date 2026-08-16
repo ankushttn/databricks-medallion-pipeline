@@ -15,6 +15,11 @@ from bronze.schemas import (
     ORDERS_BRONZE_SCHEMA,
     PRODUCTS_BRONZE_SCHEMA,
 )
+from common.pipeline_utils import (
+    validate_local_source_directory,
+    validate_schema_name,
+    validate_write_mode,
+)
 
 ENV_CATALOG = "MEDALLION_CATALOG"
 ENV_BRONZE_SCHEMA = "MEDALLION_BRONZE_SCHEMA"
@@ -89,6 +94,31 @@ def load_bronze_config(
     )
 
 
+def validate_bronze_config(config: BronzeConfig) -> None:
+    """Validate Bronze configuration before pipeline execution."""
+    validate_write_mode(config.write_mode, layer="Bronze")
+    validate_schema_name(config.bronze_schema, field="bronze_schema")
+    validate_local_source_directory(config.source_base_path)
+
+
+def load_and_validate_bronze_config(
+    *,
+    source_base_path: str | None = None,
+    catalog: str | None = None,
+    bronze_schema: str | None = None,
+    write_mode: str | None = None,
+) -> BronzeConfig:
+    """Load and validate Bronze configuration."""
+    config = load_bronze_config(
+        source_base_path=source_base_path,
+        catalog=catalog,
+        bronze_schema=bronze_schema,
+        write_mode=write_mode,
+    )
+    validate_bronze_config(config)
+    return config
+
+
 def add_bronze_config_args(parser) -> None:
     """Register Bronze configuration arguments on an argparse parser."""
     parser.add_argument(
@@ -119,7 +149,7 @@ def add_bronze_config_args(parser) -> None:
 
 def config_from_args(args) -> BronzeConfig:
     """Build BronzeConfig from parsed argparse namespace."""
-    return load_bronze_config(
+    return load_and_validate_bronze_config(
         source_base_path=args.source_base_path,
         catalog=args.catalog,
         bronze_schema=args.bronze_schema,
