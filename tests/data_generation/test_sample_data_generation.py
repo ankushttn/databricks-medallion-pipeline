@@ -7,8 +7,7 @@ from pathlib import Path
 
 import pytest
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(PROJECT_ROOT / "src" / "data_generation"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src" / "data_generation"))
 
 from generate_sample_data import (  # noqa: E402
     DEFECT_COUNTS,
@@ -20,13 +19,15 @@ from generate_sample_data import (  # noqa: E402
     validate_defect_counts,
 )
 
+pytestmark = pytest.mark.data_generation
+
 
 def _count_null_emails(customers: list[dict]) -> int:
     return sum(1 for row in customers if _is_null(row["email"]))
 
 
+@pytest.mark.unit
 def test_generate_all_produces_expected_row_counts() -> None:
-    """Integration test: full generation succeeds with expected volumes."""
     config = GenerationConfig(seed=42, output_dir=Path("data"))
     customers, products, orders = generate_all(config)
 
@@ -35,8 +36,8 @@ def test_generate_all_produces_expected_row_counts() -> None:
     assert len(orders) == config.order_count + DEFECT_COUNTS.duplicate_order_ids
 
 
+@pytest.mark.unit
 def test_intentional_defect_counts() -> None:
-    """Verify all assignment-mandated defect counts on generated data."""
     config = GenerationConfig(seed=99, output_dir=Path("data"))
     customers, _, orders = generate_all(config)
 
@@ -63,8 +64,8 @@ def test_intentional_defect_counts() -> None:
     assert invalid_product_count == DEFECT_COUNTS.invalid_product_id
 
 
+@pytest.mark.unit
 def test_deterministic_output() -> None:
-    """Same seed must produce identical in-memory datasets."""
     config = GenerationConfig(seed=7, output_dir=Path("data"))
     customers_a, products_a, orders_a = generate_all(config)
     customers_b, products_b, orders_b = generate_all(config)
@@ -74,8 +75,21 @@ def test_deterministic_output() -> None:
     assert orders_a == orders_b
 
 
+@pytest.mark.unit
+def test_products_have_no_intentional_defects() -> None:
+    config = GenerationConfig(seed=42, output_dir=Path("data"))
+    _, products, _ = generate_all(config)
+
+    for row in products:
+        assert row["product_id"]
+        assert row["product_name"]
+        assert row["category"]
+        assert row["price"]
+        assert row["cost"]
+
+
+@pytest.mark.unit
 def test_validate_defect_counts_raises_on_mismatch() -> None:
-    """Validation must fail loudly when defect counts are wrong."""
     customers = [
         {
             "customer_id": 1,

@@ -35,7 +35,24 @@ Source CSVs → Bronze (raw) → Silver (validated + flagged) → Gold (aggregat
 
 ## Status
 
-**Foundation phase** — project structure and documentation are in place. Pipeline implementation has not started.
+Bronze, Silver, Gold, and Dashboard layers are implemented with local validation. See layer-specific docs under `src/*/`.
+
+## Testing
+
+Automated tests verify business outcomes across all pipeline layers (positive and negative cases).
+
+```bash
+# Full suite (~10–15 min; requires Java + PySpark)
+python -m pytest tests/ -v
+
+# Fast unit tests only (no Spark)
+python -m pytest tests/ -m unit -v
+
+# By layer
+python -m pytest tests/data_generation/ tests/bronze/ tests/silver/ tests/gold/ tests/dashboard/ tests/integration/ -v
+```
+
+See `tests/README.md` for structure, markers, and latest results (`tests/TEST_RESULTS.md`).
 
 ## Prerequisites
 

@@ -85,6 +85,7 @@
 
 - [x] Implement `dashboard_queries.sql` (Gold tables only)
 - [x] Complete `DASHBOARD_GUIDE.md` (Databricks SQL Dashboard setup)
+- [x] Automated test suite: `tests/` (109 tests — `tests/README.md`, `tests/TEST_RESULTS.md`)
 - [ ] End-to-end validation on Databricks
 - [ ] Complete `reflection.md`
 - [ ] Complete `final-ai-usage-summary.md`
