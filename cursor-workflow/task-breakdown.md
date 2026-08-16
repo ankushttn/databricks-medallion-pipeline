@@ -1,6 +1,7 @@
 # Task Breakdown
 
-**Related:** `spec.md`, `design-notes.md`, `requirements-analysis.md`
+**Related:** `spec.md`, `design-notes.md`, `requirements-analysis.md`  
+**Last updated:** 2026-08-16
 
 ---
 
@@ -19,7 +20,7 @@
 - [x] `design-notes.md` — architecture, layers, Mermaid diagram, Delta/logging/error/DQ design (v2.0)
 - [x] `data-model.md` — full schemas, relationships, PKs/FKs, partitioning (v2.0)
 - [x] `data-quality-strategy.md` — formal DQ framework, 48 checks, metrics (v2.0)
-- [x] `cursor-workflow/spec.md` — technical specification (v2.0)
+- [x] `cursor-workflow/spec.md` — technical specification (v3.0)
 - [x] `cursor-workflow/task-breakdown.md` — this file
 
 ---
@@ -32,7 +33,8 @@
 - [x] Post-generation validation (fails loudly on mismatch)
 - [x] CLI args: `--output-dir`, `--seed`
 - [x] Update `DATA_GENERATION_NOTES.md`
-- [x] Add `tests/test_data_generation.py`
+- [x] Independent senior validator: `validate_sample_data.py` (34 checks)
+- [x] Tests: `tests/data_generation/`
 
 ## Phase 2 — Bronze Layer ✅
 
@@ -46,10 +48,11 @@
 - [x] Metadata: `_ingested_at`, `_source_file`
 - [x] Static validation (`validate_bronze_static.py`)
 - [x] Databricks execution guide (`BRONZE_EXECUTION.md`)
-- [x] `tests/test_bronze_ingest.py` (10 tests passing)
+- [x] Tests: `tests/bronze/` (15 tests)
+- [x] Production-readiness: narrowed exceptions, config validation
 - [ ] Full Delta integration test on Databricks cluster (manual)
 
-## Phase 3 — Silver Layer
+## Phase 3 — Silver Layer ✅
 
 **Design reference:** `design-notes.md` §4, `data-model.md` §5
 
@@ -60,11 +63,12 @@
 - [x] Partition `silver.orders` by `order_date`
 - [x] Verify row-count parity with Bronze
 - [x] Verify mandatory §6.4 defect counts (`data/SILVER_QUALITY_REPORT.md`, run `silver-validation-001`)
+- [x] Tests: `tests/silver/` (39 tests across dimensions + integration + metrics)
+- [x] `src/silver/validate_silver_local.py` for CSV-based validation without Delta
+- [x] `SILVER_ARCHITECTURE.md`
 - [ ] Update `database/schema.sql` with Silver DDL
-- [x] Add `tests/test_silver_quality.py`
-- [x] Add `src/silver/validate_silver_local.py` for CSV-based validation without Delta
 
-## Phase 4 — Gold Layer
+## Phase 4 — Gold Layer ✅
 
 **Design reference:** `design-notes.md` §5, `data-model.md` §6
 
@@ -74,24 +78,31 @@
 - [x] Implement `04_customer_segmentation.sql` → `gold.customer_segmentation`
 - [x] Implement `create_gold_tables.py` orchestrator
 - [x] Filter Silver inputs to `_is_valid = true`
-- [x] Add `src/gold/validate_gold_local.py` and `tests/test_gold_aggregations.py`
+- [x] `src/gold/validate_gold_local.py` and `tests/gold/test_gold_aggregations.py`
 - [x] Document assumptions in `src/gold/GOLD_ARCHITECTURE.md`
-- [x] Senior reconciliation: `src/gold/reconciliation.py`, `reconcile_gold_local.py`, `tests/test_gold_reconciliation.py` (all PASS)
+- [x] Senior reconciliation: `reconciliation.py`, `reconcile_gold_local.py`, `tests/gold/test_gold_reconciliation.py` (all PASS)
+- [x] Segmentation tests: `tests/gold/test_gold_segmentation.py`
 - [ ] Update `database/schema.sql` with Gold DDL
 
-## Phase 5 — Dashboard & Wrap-up
+## Phase 5 — Dashboard, Testing & Wrap-up
 
 **Design reference:** `design-notes.md` §6
 
-- [x] Implement `dashboard_queries.sql` (Gold tables only)
+- [x] Implement `dashboard_queries.sql` (Gold tables only — 12 queries)
 - [x] Complete `DASHBOARD_GUIDE.md` (Databricks SQL Dashboard setup)
-- [x] Automated test suite: `tests/` (109 tests — `tests/README.md`, `tests/TEST_RESULTS.md`)
+- [x] `validate_dashboard_local.py` + `tests/dashboard/test_dashboard_queries.py`
+- [x] Automated test suite: `tests/` — **120 tests PASS** (`tests/README.md`, `tests/TEST_RESULTS.md`)
+- [x] Production-readiness review (`ERROR_HANDLING.md`, `pipeline_utils.py`)
+- [x] Professional `README.md` (22 sections + Mermaid)
+- [x] Update all `ai-prompts/` layer files with evidence documentation
+- [x] Update `cursor-workflow/project-context.md`, `spec.md`, `cursor-rules-or-instructions.md`
 - [ ] End-to-end validation on Databricks
+- [ ] Databricks SQL Dashboard UI verification
 - [ ] Complete `reflection.md`
 - [ ] Complete `final-ai-usage-summary.md`
-- [ ] Update all `ai-prompts/` layer files
-- [ ] Final review against `requirements-analysis.md` and `spec.md`
 - [ ] Complete `candidate-info.md`
+- [ ] Final review against `requirements-analysis.md` and `spec.md`
+- [ ] `database/schema.sql` Silver/Gold DDL
 
 ---
 
@@ -119,4 +130,32 @@ silver.customers + silver.orders → gold.customer_segmentation
 
 ---
 
-*Last updated: 2026-08-15*
+## Validation Summary (local, 2026-08-16)
+
+| Check | Command | Result |
+|-------|---------|--------|
+| Sample data | `validate_sample_data.py` | 34/34 PASS |
+| Bronze static | `validate_bronze_static.py` | PASS |
+| Silver quality | `validate_silver_local.py` | All mandatory defects detected |
+| Gold validation | `validate_gold_local.py` | 15/15 queries PASS |
+| Gold reconciliation | `reconcile_gold_local.py` | 11/11 checks PASS |
+| Dashboard SQL | `validate_dashboard_local.py` | 12/12 queries PASS |
+| Full pytest | `python -m pytest tests/ -v` | **120/120 PASS** (~8m 48s) |
+
+---
+
+## AI Evidence Documentation
+
+All major Cursor interactions documented in:
+
+| File | Sessions covered |
+|------|------------------|
+| `ai-prompts/documentation.md` | Foundation, requirements, architecture, DQ strategy, README, this evidence pass |
+| `ai-prompts/data-generation.md` | Generation + senior CSV review |
+| `ai-prompts/bronze-layer.md` | Bronze ingestion |
+| `ai-prompts/silver-layer.md` | Framework + validation |
+| `ai-prompts/gold-layer.md` | Implementation + senior reconciliation |
+| `ai-prompts/dashboard.md` | Dashboard SQL + guide |
+| `ai-prompts/debugging.md` | All debugging sessions and AI rejections |
+
+Source transcript: `50551ecf-026a-4549-8321-588606fc1847.jsonl`
