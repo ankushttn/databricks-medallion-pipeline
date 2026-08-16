@@ -32,8 +32,12 @@ metrics tables, and orchestration. Do not delete bad records.
 ## Validation
 
 ```bash
-python -m pytest tests/test_silver_quality.py tests/test_bronze_ingest.py tests/test_data_generation.py -v
+python -m pytest tests/test_silver_quality.py tests/test_silver_metrics.py -v
+python src/silver/validate_silver_local.py --data-dir data --output-dir data
 ```
+
+**Local validation run `silver-validation-001` (2026-08-16):** all mandatory defects detected.
+Report: `data/SILVER_QUALITY_REPORT.md`
 
 Delta writes require Databricks after Bronze ingest:
 

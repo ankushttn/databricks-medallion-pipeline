@@ -53,15 +53,16 @@
 
 **Design reference:** `design-notes.md` §4, `data-model.md` §5
 
-- [ ] Implement checks per `data-quality-strategy.md` (48 checks across 5 dimensions)
-- [ ] Implement `create_silver_tables.py` (order: customers → products → orders → DQ summary)
-- [ ] Add `_is_valid`, `_quality_issues`, `_validated_at` columns
-- [ ] Create `silver.data_quality_summary` reporting table
-- [ ] Partition `silver.orders` by `order_date`
-- [ ] Verify row-count parity with Bronze
-- [ ] Verify ~700 invalid rows and all §6.4 defect counts
+- [x] Implement checks per `data-quality-strategy.md` (48 checks across 5 dimensions)
+- [x] Implement `create_silver_tables.py` (order: customers → products → orders → DQ summary)
+- [x] Add `_is_valid`, `_quality_issues`, `_validated_at` columns
+- [x] Create `silver.data_quality_summary` reporting table
+- [x] Partition `silver.orders` by `order_date`
+- [x] Verify row-count parity with Bronze
+- [x] Verify mandatory §6.4 defect counts (`data/SILVER_QUALITY_REPORT.md`, run `silver-validation-001`)
 - [ ] Update `database/schema.sql` with Silver DDL
-- [ ] Add `tests/test_silver_quality.py`
+- [x] Add `tests/test_silver_quality.py`
+- [x] Add `src/silver/validate_silver_local.py` for CSV-based validation without Delta
 
 ## Phase 4 — Gold Layer
 
