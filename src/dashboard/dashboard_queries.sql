@@ -30,7 +30,7 @@
 -- DAILY grain only so weekly rows are not double-counted.
 SELECT
     CAST(SUM(total_revenue) AS DECIMAL(14, 2)) AS total_revenue
-FROM gold.daily_weekly_trends
+FROM databricks_assignment.gold.daily_weekly_trends
 WHERE trend_grain = 'DAILY';
 
 
@@ -43,7 +43,7 @@ WHERE trend_grain = 'DAILY';
 -- Interpretation: Sum of daily order counts; each order counted once per day.
 SELECT
     SUM(total_orders) AS total_orders
-FROM gold.daily_weekly_trends
+FROM databricks_assignment.gold.daily_weekly_trends
 WHERE trend_grain = 'DAILY';
 
 
@@ -62,7 +62,7 @@ SELECT
             ELSE 0
         END AS DECIMAL(12, 2)
     ) AS avg_order_value
-FROM gold.daily_weekly_trends
+FROM databricks_assignment.gold.daily_weekly_trends
 WHERE trend_grain = 'DAILY';
 
 
@@ -76,7 +76,7 @@ WHERE trend_grain = 'DAILY';
 -- zero orders (lifetime_value_actual = 0).
 SELECT
     COUNT(*) AS total_customers
-FROM gold.revenue_by_customer;
+FROM databricks_assignment.gold.revenue_by_customer;
 
 
 -- =============================================================================
@@ -98,7 +98,7 @@ SELECT
     total_orders,
     total_revenue,
     avg_order_value
-FROM gold.sales_by_product
+FROM databricks_assignment.gold.sales_by_product
 ORDER BY total_revenue DESC
 LIMIT 10;
 
@@ -140,7 +140,7 @@ FROM (
             WHEN lifetime_value_actual < 2500 THEN 5
             ELSE 6
         END AS revenue_bucket_sort
-    FROM gold.revenue_by_customer
+    FROM databricks_assignment.gold.revenue_by_customer
 ) AS bucketed
 GROUP BY
     revenue_bucket,
@@ -170,7 +170,7 @@ SELECT
         100.0 * customer_count / SUM(customer_count) OVER (),
         2
     ) AS customer_pct
-FROM gold.customer_segmentation
+FROM databricks_assignment.gold.customer_segmentation
 ORDER BY
     customer_count DESC;
 
@@ -190,7 +190,7 @@ SELECT
     total_orders,
     total_revenue,
     avg_order_value
-FROM gold.daily_weekly_trends
+FROM databricks_assignment.gold.daily_weekly_trends
 WHERE trend_grain = 'DAILY'
 ORDER BY
     date;
@@ -210,7 +210,7 @@ SELECT
     total_orders,
     total_revenue,
     avg_order_value
-FROM gold.daily_weekly_trends
+FROM databricks_assignment.gold.daily_weekly_trends
 WHERE trend_grain = 'WEEKLY'
 ORDER BY
     week;
@@ -230,7 +230,7 @@ SELECT
     total_orders,
     lifetime_value_actual,
     avg_order_value
-FROM gold.revenue_by_customer
+FROM databricks_assignment.gold.revenue_by_customer
 ORDER BY
     lifetime_value_actual DESC
 LIMIT 10;
@@ -248,6 +248,6 @@ SELECT
     avg_revenue,
     total_revenue,
     _refreshed_at
-FROM gold.customer_segmentation
+FROM databricks_assignment.gold.customer_segmentation
 ORDER BY
     total_revenue DESC;
