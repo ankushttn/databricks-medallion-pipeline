@@ -12,6 +12,18 @@ All scripts filter Silver inputs to ``_is_valid = TRUE``.
 
 from __future__ import annotations
 
+import sys
+import os
+
+REPO = "/Workspace/Repos/ankushkumar645@gmail.com/databricks-medallion-pipeline"
+DATA = f"{REPO}/data"
+SRC = f"{REPO}/src"
+sys.path.insert(0, SRC)
+
+os.environ["MEDALLION_CATALOG"] = "databricks_assignment"
+os.environ["MEDALLION_SOURCE_BASE_PATH"] = DATA
+os.environ["MEDALLION_BRONZE_WRITE_MODE"] = "overwrite"
+
 import argparse
 import logging
 import sys
@@ -68,4 +80,9 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    code = main([
+        "--catalog", "databricks_assignment",
+    ])
+    if code != 0:
+        raise RuntimeError(f"Gold pipeline failed with exit code {code}")
+    print("Gold layer creation completed successfully")
