@@ -820,4 +820,6 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    # Pass empty argv to use defaults when running in Databricks
+    # Don't use sys.exit() in Databricks - just call main() directly
+    main(argv=[])
